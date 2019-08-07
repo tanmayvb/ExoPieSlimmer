@@ -1,19 +1,12 @@
 import os 
 import sys 
+from SFFactory import * 
+etabins=eta_bins_eleTrig_hEffEtaPt
+ptbins=pt_bins_eleTrig_hEffEtaPt
 
-etabins=[]
-ptbins=[]
+ele_trig_eff_sf=dict_eleTrig_hEffEtaPt
 
-ele_trig_eff_sf=get_ele_trig_eff_from_dict_files
-
-of just 
-
-{
-'''
-add dict here 
-'''
-}
-
+print etabins, ptbins, ele_trig_eff_sf
 
 #may be add everything in one object so that just one object is enough to play with. like this 
 
@@ -26,19 +19,23 @@ def getptetabin(pt,eta):
     iptbin=
     ietabin=
     '''
-    return [iptbin,ietabin]
+    #return [iptbin,ietabin]
+    return [15,4]
 
 
 def getKey(iptbin,ietabin):
-    ptetakey='pt_'+str(iptbin)+'eta_'+str(ietabin)
-
+    ptetakey='pt_'+str(iptbin)+'_eta_'+str(ietabin)
+    return ptetakey
 def readEleTrigSF(pt, eta):
     
-    iptetabin=getptbin(pt,eta)
+    iptetabin=getptetabin(pt,eta)
     iptbin = iptetabin[0]
     ietabin = iptetabin[1]
-    
+    print iptetabin
     key__ = getKey(iptbin,ietabin)
     
-    
+    print "key = ", key__
     sf = ele_trig_eff_sf[key__]
+    return sf
+
+print "sf=", readEleTrigSF(12,1.4)
