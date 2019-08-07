@@ -12,7 +12,18 @@ from pandas import  DataFrame, concat
 from pandas import Series
 import time
 
-# snippet from Deepak
+################################################################################################################
+##---changes to be made: 
+##--- 1. one trigger flag for one physics object or one CR 
+##--- 2. write trigger list in another python file 
+##--- 3. filter list in another python file 
+##--- 4. import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
+##--- 5. rename jetvariables and move to a new file 
+##--- 6. move https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L183-L273 into a function
+##--- 7. add AK8 jet information
+##--- 8. use the out of new ExoPieElement as input for the skimmer
+##--- 9. update the variable names
+################################################################################################################
 from multiprocessing import Process
 import multiprocessing as mp
 
@@ -72,13 +83,7 @@ def runbbdm(infile_):
     outfile = TFile(outfilename,'RECREATE')
 
     outTree = TTree( 'outTree', 'tree branches' )
-    # if isfarmout:
-    #     samplepath = TNamed('samplepath', str(f_tmp).split('"')[1])
-    # else:
-
-    #if len(sys.argv)>2:
-    #    NEntries=int(sys.argv[2])
-    #    print "WARNING: Running in TEST MODE"
+    
     jetvariables = ['runId','lumiSection','eventId','isData','mcWeight','pu_nTrueInt','pu_nPUVert','hlt_trigName','hlt_trigResult','hlt_filterName','hlt_filterResult','pfMetCorrPt','pfMetCorrPhi','pfMetCorrUnc','nEle','elePx','elePy','elePz','eleEnergy','eleIsPassLoose','eleIsPassTight','eleCharge','nPho','phoPx','phoPy','phoPz','phoEnergy','phoIsPassLoose','phoIsPassTight','nMu','muPx','muPy','muPz','muEnergy','isLooseMuon','isTightMuon','muChHadIso','muNeHadIso','muGamIso','muPUPt','muCharge','HPSTau_n','HPSTau_Px','HPSTau_Py','HPSTau_Pz','HPSTau_Energy','disc_decayModeFinding','disc_byLooseIsolationMVArun2v1DBoldDMwLT2016','nGenPar','genParId','genMomParId','genParSt','genPx','genPy','genPz','genEnergy','THINnJet', 'THINjetPx', 'THINjetPy', 'THINjetPz', 'THINjetEnergy','THINjetPassIDTight','THINjetDeepCSV_b', 'THINjetHadronFlavor', 'THINjetNHadEF', 'THINjetCHadEF', 'THINjetCEmEF', 'THINjetPhoEF', 'THINjetEleEF', 'THINjetMuoEF', 'THINjetCorrUncUp','THINjetNPV']
     filename = infile_
     ieve = 0;icount = 0
@@ -94,7 +99,7 @@ def runbbdm(infile_):
         st_pfMetUncJetResDown     = ROOT.std.vector('float')()
         st_pfMetUncJetEnUp        = ROOT.std.vector('float')()
         st_pfMetUncJetEnDown      = ROOT.std.vector('float')()
-        st_isData           = array( 'b', [ 0 ] )
+        st_isData                 = array( 'b', [ 0 ] )
 
         for trigs in triglist:
             exec("st_"+trigs+"  = array( 'b', [ 0 ] )")
