@@ -1,4 +1,23 @@
 import os 
+import sys 
+
+etabins=[]
+ptbins=[]
+
+ele_trig_eff_sf=get_ele_trig_eff_from_dict_files
+
+of just 
+
+{
+'''
+add dict here 
+'''
+}
+
+
+#may be add everything in one object so that just one object is enough to play with. like this 
+
+ele_trig_sf_info=[etabins, ptbins, ele_trig_eff_sf]
 
 def getptetabin(pt,eta):
     
@@ -19,4 +38,7 @@ def readEleTrigSF(pt, eta):
     iptbin = iptetabin[0]
     ietabin = iptetabin[1]
     
-    getKey(iptbin,ietabin)
+    key__ = getKey(iptbin,ietabin)
+    
+    
+    sf = ele_trig_eff_sf[key__]
