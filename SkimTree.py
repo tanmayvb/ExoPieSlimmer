@@ -14,15 +14,17 @@ import time
 
 ################################################################################################################
 ##---changes to be made: 
-##--- 1. one trigger flag for one physics object or one CR 
+##--------- 1. one trigger flag for one physics object or one CR 
 ##--------- 2. write trigger list in another python file 
-##--- 3. filter list in another python file 
-##--- 4. import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
-##--- 5. rename jetvariables and move to a new file 
+##--------- 3. filter list in another python file 
+##--- 4.  import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
+##--- 4.1 tried it, it is very difficult, its better to write own class p4. and use it for all kind of operation. in this one can implement, the functions 
+##---      pt, eta, phi, mass, delta R, delta phi, + , -  (anything else we use?) 
+##--------- 5. rename jetvariables and move to a new file 
 ##--- 6. move https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L183-L273 into a function
 ##--- 7. add AK8 jet information
-##--- 8. use the out of new ExoPieElement as input for the skimmer
-##--- 9. update the variable names
+##--- 8. update the variable names
+##--- 9. use the out of new ExoPieElement as input for the skimmer
 ################################################################################################################
 from multiprocessing import Process
 import multiprocessing as mp
@@ -31,12 +33,20 @@ import multiprocessing as mp
 
 
 ## user packages 
-sys.path.append('utils')
-sys.path.append('../utils')
-from MathUtils import *
-
+## in local dir 
 import  triggers as trig
 import variables as branches 
+
+## from commonutils
+sys.path.append('../ExoPieUtils/commonutils/')
+from MathUtils import *
+
+## from analysisutils
+sys.path.append('../ExoPieUtils/analysisutils/')
+import analysis_utils as anautil 
+
+
+
 print "starting clock"
 start = time.clock()
 
@@ -57,7 +67,7 @@ if args.farmout==None:
 else:
     isfarmout = args.farmout
 
-infilename = args.inputfile
+infilename = "NCUGlobalTuples.root"
 print 'outfile= ', args.outputfile
 
 def arctan(x,y):
@@ -93,7 +103,7 @@ def runbbdm(infile_):
     filename = infile_
     ieve = 0;icount = 0
     for df in read_root(filename, columns=jetvariables, chunksize=125000):
-        samplepath = TNamed('samplepath', str(infile))
+        #samplepath = TNamed('samplepath', str(infile))
 
         st_runId                  = numpy.zeros(1, dtype=int)
         st_lumiSection            = array( 'L', [ 0 ] )
@@ -303,7 +313,7 @@ def runbbdm(infile_):
 
             trigstatus=False
             for itrig in range(len(triglist)):
-                exec(triglist[itrig]+" = CheckFilter(trigName_, trigResult_, " + "'" + triglist[itrig] + "')")
+                exec(triglist[itrig]+" = anautil.CheckFilter(trigName_, trigResult_, " + "'" + triglist[itrig] + "')")
                 exec("if "+triglist[itrig]+": trigstatus=True")
                 exec("st_"+triglist[itrig]+"[0]="+triglist[itrig])
             if not isData: trigstatus=True
@@ -315,13 +325,13 @@ def runbbdm(infile_):
             filterstatus = False
             filter1 = False; filter2 = False;filter3 = False;filter4 = False; filter5 = False; filter6 = False; filter7=False
             ifilter_=0
-            filter1 = CheckFilter(filterName, filterResult, 'Flag_HBHENoiseFilter')
-            filter2 = CheckFilter(filterName, filterResult, 'Flag_globalTightHalo2016Filter')
-            filter3 = CheckFilter(filterName, filterResult, 'Flag_eeBadScFilter')
-            filter4 = CheckFilter(filterName, filterResult, 'Flag_goodVertices')
-            filter5 = CheckFilter(filterName, filterResult, 'Flag_EcalDeadCellTriggerPrimitiveFilter')
-            fileer6 = CheckFilter(filterName, filterResult, 'Flag_BadPFMuonFilter')
-            filter7 = CheckFilter(filterName, filterResult, 'Flag_HBHENoiseIsoFilter')
+            filter1 = anautil.CheckFilter(filterName, filterResult, 'Flag_HBHENoiseFilter')
+            filter2 = anautil.CheckFilter(filterName, filterResult, 'Flag_globalTightHalo2016Filter')
+            filter3 = anautil.CheckFilter(filterName, filterResult, 'Flag_eeBadScFilter')
+            filter4 = anautil.CheckFilter(filterName, filterResult, 'Flag_goodVertices')
+            filter5 = anautil.CheckFilter(filterName, filterResult, 'Flag_EcalDeadCellTriggerPrimitiveFilter')
+            fileer6 = anautil.CheckFilter(filterName, filterResult, 'Flag_BadPFMuonFilter')
+            filter7 = anautil.CheckFilter(filterName, filterResult, 'Flag_HBHENoiseIsoFilter')
             if not isData:
                 filterstatus = True
             if isData:
@@ -741,77 +751,16 @@ def runbbdm(infile_):
         outfile.cd()
         h_total_mcweight.Write()
         h_total.Write()
-        samplepath.Write()
         outfile.Write()
 
     end = time.clock()
     print "%.4gs" % (end-start)
 
-def CheckFilter(filterName, filterResult,filtercompare):
-    ifilter_=0
-    filter1 = False
-    for ifilter in filterName:
-        filter1 = (ifilter.find(filtercompare) != -1)  & (bool(filterResult[ifilter_]) == True)
-        if filter1: break
-        ifilter_ = ifilter_ + 1
-    return filter1
-
-def DeltaR(p4_1, p4_2):
-    eta1 = p4_1.Eta()
-    eta2 = p4_2.Eta()
-    eta = eta1 - eta2
-    eta_2 = eta * eta
-
-    phi1 = p4_1.Phi()
-    phi2 = p4_2.Phi()
-    phi = Phi_mpi_pi(phi1-phi2)
-    phi_2 = phi * phi
-
-    return math.sqrt(eta_2 + phi_2)
-
-def Phi_mpi_pi(x):
-    kPI = 3.14159265358979323846
-    kTWOPI = 2 * kPI
-
-    while (x >= kPI): x = x - kTWOPI;
-    while (x < -kPI): x = x + kTWOPI;
-    return x;
-
-def DeltaPhi(phi1,phi2):
-   phi = Phi_mpi_pi(phi1-phi2)
-
-   return abs(phi)
-
-def CheckFilter(filterName, filterResult,filtercompare):
-    ifilter_=0
-    filter1 = False
-    for ifilter in filterName:
-        filter1 = (ifilter.find(filtercompare) != -1)  & (bool(filterResult[ifilter_]) == True)
-        if filter1: break
-        ifilter_ = ifilter_ + 1
-    return filter1
-
-def MT(Pt, met, dphi):
-    return ROOT.TMath.Sqrt( 2 * Pt * met * (1.0 - ROOT.TMath.Cos(dphi)) )
-
-def InvMass(px1,py1,pz1,pe1,px2,py2,pz2,pe2):
-    p1 = TLorentzVector(px1, py1, pz1, pe1)
-    p2 = TLorentzVector(px2, py2, pz2, pe2)
-    inv_mass = (p1+p2).M()
-    return inv_mass
-
-files = []
-if not isfarmout:
-    files.append(infilename)
-elif isfarmout:
-    infile = open(infilename)
-    failcount=0
-    for ifile in infile:
-        files.append(ifile.rstrip())
+files=["NCUGlobalTuples.root"]
 
 if __name__ == '__main__':
     try:
-        pool = mp.Pool()
+        pool = mp.Pool(1)
         pool.map(runbbdm, files)
         pool.close()
     except Exception as e:
