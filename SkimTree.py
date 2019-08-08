@@ -36,24 +36,40 @@ import multiprocessing as mp
 ## in local dir 
 import  triggers as trig
 import variables as branches 
+import filters as filters
 
 ## from commonutils
 sys.path.append('../ExoPieUtils/commonutils/')
+import MathUtils as mathutil
 from MathUtils import *
+import BooleanUtils as boolutil
+
 
 ## from analysisutils
 sys.path.append('../ExoPieUtils/analysisutils/')
 import analysis_utils as anautil 
 
+######################################################################################################
+## All import are done before this 
+######################################################################################################
 
 
-print "starting clock"
+## ----- start if clock 
+
 start = time.clock()
 
+
+
 outfilename= 'SkimmedTree.root'
+
+
+## ---- make these variables configurable if they are really needed 
 PUPPI = True
 CA15  = False
 
+
+
+## ----- command line argument 
 usage = "analyzer for bb+DM (debugging) "
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile",  dest="inputfile")
@@ -68,8 +84,11 @@ else:
     isfarmout = args.farmout
 
 infilename = "NCUGlobalTuples.root"
-print 'outfile= ', args.outputfile
 
+
+
+
+## ---- move this to mathutils, see if these checks are needed, and how can they be performed without ROOT, 
 def arctan(x,y):
     corr=0
     if (x>0 and y>=0) or (x>0 and y<0):
@@ -116,8 +135,8 @@ def runbbdm(infile_):
         st_pfMetUncJetEnDown      = ROOT.std.vector('float')()
         st_isData                 = array( 'b', [ 0 ] )
 
-        for trigs in triglist:
-            exec("st_"+trigs+"  = array( 'b', [ 0 ] )")
+        #for trigs in triglist:
+        #    exec("st_"+trigs+"  = array( 'b', [ 0 ] )")
 
         maxn = 10
 
@@ -211,8 +230,8 @@ def runbbdm(infile_):
         outTree.Branch( 'st_pfMetUncJetEnDown', st_pfMetUncJetEnDown)
         outTree.Branch( 'st_isData', st_isData , 'st_isData/O')
 
-        for trigs in triglist:
-            exec("outTree.Branch( 'st_"+trigs+"', st_"+trigs+" , 'st_"+trigs+"/O')")
+        #for trigs in triglist:
+        #    exec("outTree.Branch( 'st_"+trigs+"', st_"+trigs+" , 'st_"+trigs+"/O')")
 
         outTree.Branch( 'st_THINnJet',st_THINnJet, 'st_THINnJet/L' )
         outTree.Branch( 'st_THINjetPx', st_THINjetPx  )
@@ -294,7 +313,9 @@ def runbbdm(infile_):
         
         
         for run,lumi,event,isData,mcWeight_,pu_nTrueInt_,pu_nPUVert_,trigName_,trigResult_,filterName,filterResult,met_,metphi_,metUnc_,nele_,elepx_,elepy_,elepz_,elee_,elelooseid_,eleTightid_,eleCharge_,npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muChHadIso_,muNeHadIso_,muGamIso_,muPUPt_,muCharge_,nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_ in zip(df.runId,df.lumiSection,df.eventId,df.isData,df.mcWeight,df.pu_nTrueInt,df.pu_nPUVert,df.hlt_trigName,df.hlt_trigResult,df.hlt_filterName,df.hlt_filterResult,df.pfMetCorrPt,df.pfMetCorrPhi,df.pfMetCorrUnc,df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassLoose,df.eleIsPassTight,df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.muChHadIso,df.muNeHadIso,df.muGamIso,df.muPUPt,df.muCharge,df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2v1DBoldDMwLT2016,df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genPx,df.genPy,df.genPz,df.genEnergy,df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV):
-            if ieve%500==0: print "Processed",ieve,"Events"
+            
+
+            if ieve%1000==0: print "Processed",ieve,"Events"
             ieve = ieve + 1
             # -------------------------------------------------
             # MC Weights
@@ -310,33 +331,30 @@ def runbbdm(infile_):
             # -------------------------------------------------
             ## Trigger selection
             # -------------------------------------------------
-
-            trigstatus=False
+            
+            trigdecision=False
+            trigstatus=[False for itrig in range(len(triglist))]
             for itrig in range(len(triglist)):
-                exec(triglist[itrig]+" = anautil.CheckFilter(trigName_, trigResult_, " + "'" + triglist[itrig] + "')")
-                exec("if "+triglist[itrig]+": trigstatus=True")
-                exec("st_"+triglist[itrig]+"[0]="+triglist[itrig])
-            if not isData: trigstatus=True
-            if not trigstatus: continue
+                trigstatus[itrig] = anautil.CheckFilter(trigName_, trigResult_, triglist[itrig])
+                
+            #print trigstatus
+            trigdecision = boolutil.logical_OR(trigstatus)
+            #print " trigdecision = ", trigdecision
+            if not isData: trigdecision=True
+            if not trigdecision: continue
 
             # ------------------------------------------------------
             ## Filter selection
             # ------------------------------------------------------
-            filterstatus = False
-            filter1 = False; filter2 = False;filter3 = False;filter4 = False; filter5 = False; filter6 = False; filter7=False
-            ifilter_=0
-            filter1 = anautil.CheckFilter(filterName, filterResult, 'Flag_HBHENoiseFilter')
-            filter2 = anautil.CheckFilter(filterName, filterResult, 'Flag_globalTightHalo2016Filter')
-            filter3 = anautil.CheckFilter(filterName, filterResult, 'Flag_eeBadScFilter')
-            filter4 = anautil.CheckFilter(filterName, filterResult, 'Flag_goodVertices')
-            filter5 = anautil.CheckFilter(filterName, filterResult, 'Flag_EcalDeadCellTriggerPrimitiveFilter')
-            fileer6 = anautil.CheckFilter(filterName, filterResult, 'Flag_BadPFMuonFilter')
-            filter7 = anautil.CheckFilter(filterName, filterResult, 'Flag_HBHENoiseIsoFilter')
-            if not isData:
-                filterstatus = True
-            if isData:
-                filterstatus =  filter1 & filter2 & filter3 & filter4 & filter5 & filter6 & filter7
-            if filterstatus == False: continue
+            filterdecision=False
+            filterstatus = [False for ifilter in range(len(filters.filters2017)) ]
+            filterstatus = [anautil.CheckFilter(filterName, filterResult, filters.filters2017[ifilter]) for ifilter in range(len(filters.filters2017)) ]
+            
+            
+            if not isData:     filterdecision = True
+            if isData:         filterdecision  = boolutil.logical_OR(filterstatus)
+            
+            if filterdecision == False: continue
 
             # ------------------------------------------------------
             ## PFMET Selection
@@ -350,19 +368,15 @@ def runbbdm(infile_):
             *         *      *  *      *
             *         *      *   ******
             '''
+            
+            
             phopt = [getPt(phopx_[ip], phopy_[ip]) for ip in range(npho_)]
             phoeta = [getEta(phopx_[ip], phopy_[ip], phopz_[ip]) for ip in range(npho_)]
-
-            pho_pt15 = [(phopt[ip] > 15.0) for ip in range(npho_)]
-            pho_eta2p5 = [(abs(phoeta[ip]) < 2.5) for ip in range(npho_)]
-            pho_IDLoose = [(pholooseid_[ip]) for ip in range(npho_)]
-
-            pho_pt15_eta2p5_looseID = []
-            if len(pho_pt15) > 0:
-                pho_pt15_eta2p5_looseID = logical_AND_List3(pho_pt15, pho_eta2p5, pho_IDLoose)
-
-            pass_pho_index = WhereIsTrue(pho_pt15_eta2p5_looseID, 1)
-            if debug_: print "pass_ele_index",pass_ele_index
+            
+            pho_pt15_eta2p5_looseID = [ (phopt[ip] > 15.0) and (abs(phoeta[ip]) < 2.5) and (pholooseid_[ip])               for ip in range(npho_)]
+            pass_pho_index = boolutil.WhereIsTrue(pho_pt15_eta2p5_looseID, 1)
+            
+                        
             '''
             ****   *      ****
             *      *      *
@@ -373,18 +387,11 @@ def runbbdm(infile_):
             elept = [getPt(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
             eleeta = [getEta(elepx_[ie], elepy_[ie], elepz_[ie]) for ie in range(nele_)]
             elephi = [getPhi(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
-
-            ele_pt10 = [(elept[ie] > 10.0) for ie in range(nele_)]
-            ele_eta2p5 = [((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5)) for ie in range(nele_)]
-            ele_IDLoose = [(elelooseid_[ie]) for ie in range(nele_)]
-
-            ele_pt10_eta2p5_looseID = []
-            if len(ele_pt10) > 0:
-                ele_pt10_eta2p5_looseID = logical_AND_List3(ele_pt10, ele_eta2p5, ele_IDLoose)
-
-            pass_ele_index = WhereIsTrue(ele_pt10_eta2p5_looseID, 1)
-            if debug_: print "pass_ele_index",pass_ele_index
-
+            
+            ele_pt10_eta2p5_looseID  = [(elept[ie] > 10.0) and (elelooseid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
+            pass_ele_index = boolutil.WhereIsTrue(ele_pt10_eta2p5_looseID, 1)
+            
+            
             '''
             **     *  *     *
             * *  * *  *     *
@@ -404,9 +411,9 @@ def runbbdm(infile_):
 
             mu_pt10_eta2p4_looseID_looseISO = []
             if len(mu_pt10) > 0:
-                mu_pt10_eta2p4_looseID_looseISO = logical_AND_List2(mu_IDLoose, mu_IsoLoose)
+                mu_pt10_eta2p4_looseID_looseISO = boolutil.logical_AND_List2(mu_IDLoose, mu_IsoLoose)
 
-            pass_mu_index = WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO, 1)
+            pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO, 1)
             if debug_: print "pass_mu_index",pass_mu_index
 
             '''
@@ -426,7 +433,7 @@ def runbbdm(infile_):
 
             ak4_pt30_eta4p5_IDT = []
             if len(ak4_pt30) > 0:
-                ak4_pt30_eta4p5_IDT = logical_AND_List3(ak4_pt30, ak4_eta4p5, ak4_IDTightVeto)
+                ak4_pt30_eta4p5_IDT = boolutil.logical_AND_List3(ak4_pt30, ak4_eta4p5, ak4_IDTightVeto)
 
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
@@ -438,7 +445,7 @@ def runbbdm(infile_):
                         pass_ijet_iele_.append(ak4_pt30_eta4p5_IDT[ijet] and ele_pt10_eta2p5_looseID[iele] and (
                             Delta_R(ak4eta[ijet], eleeta[iele], ak4phi[ijet], elephi[iele]) > 0.4))
                     # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    jetCleanAgainstEle.append(len(WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
+                    jetCleanAgainstEle.append(len(boolutil.WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
                     if debug_:
                         print "pass_ijet_iele_ = ", pass_ijet_iele_
                         print "jetCleanAgainstEle = ", jetCleanAgainstEle
@@ -448,13 +455,24 @@ def runbbdm(infile_):
                         pass_ijet_imu_.append(ak4_pt30_eta4p5_IDT[ijet] and mu_pt10_eta2p4_looseID_looseISO[imu] and (Delta_R(ak4eta[ijet], mueta[imu], ak4phi[ijet], muphi[imu]) > 0.4))
                     # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
                     if debug_:print "pass_ijet_imu_ = ", pass_ijet_imu_
-                    jetCleanAgainstMu.append(len(WhereIsTrue(pass_ijet_imu_)) == len(pass_ijet_imu_))
+                    jetCleanAgainstMu.append(len(boolutil.WhereIsTrue(pass_ijet_imu_)) == len(pass_ijet_imu_))
                     if debug_:print "jetCleanAgainstMu = ", jetCleanAgainstMu
 
-                jetCleaned = logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
-                pass_jet_index_cleaned = WhereIsTrue(jetCleaned, 3)
+                jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
+                pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned, 3)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
 
+
+
+            '''
+            ******      *******   *****   *******
+            *              *      *          *
+            *****  ----    *      ****       *
+            *              *      *          *
+            *           ***       *****      *
+
+            
+            '''
             '''
             ********    *        *       *
                *      *    *     *       *
@@ -474,13 +492,13 @@ def runbbdm(infile_):
 
             tau_pt18_eta2p3 = []
             if (len(tau_pt18) > 0 and len(tau_eta2p3) > 0):
-                tau_pt18_eta2p3 = logical_AND_List2(tau_pt18, tau_eta2p3)
+                tau_pt18_eta2p3 = boolutil.logical_AND_List2(tau_pt18, tau_eta2p3)
             if debug_:print "tau_pt18_eta2p3 = ", tau_pt18_eta2p3
 
             ''' take AND of all the tau cuts (just take the lists) '''
             tau_eta2p3_iDLdm_pt18 = []
             if (len(tau_eta2p3) > 0):
-                tau_eta2p3_iDLdm_pt18 = logical_AND_List4(
+                tau_eta2p3_iDLdm_pt18 = boolutil.logical_AND_List4(
                     tau_eta2p3, tau_DM, tau_pt18,tau_IDLoose )
             if debug_:print "tau_eta2p3_iDLdm_pt18 = ", tau_eta2p3_iDLdm_pt18
 
@@ -493,7 +511,7 @@ def runbbdm(infile_):
                     for iele in range(len(ele_pt10_eta2p5_looseID)):
                         pass_itau_iele_.append(tau_pt18_eta2p3[itau] and ele_pt10_eta2p5_looseID[iele] and (Delta_R(taueta[itau], eleeta[iele], tauphi[itau], elephi[iele]) > 0.4))
                     # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    tauCleanAgainstEle.append(len(WhereIsTrue(pass_itau_iele_)) == len(pass_itau_iele_))
+                    tauCleanAgainstEle.append(len(boolutil.WhereIsTrue(pass_itau_iele_)) == len(pass_itau_iele_))
                     if debug_:
                         print "pass_itau_iele_ = ", pass_itau_iele_
                         print "tauCleanAgainstEle = ", tauCleanAgainstEle
@@ -503,11 +521,11 @@ def runbbdm(infile_):
                         pass_itau_imu_.append(tau_pt18_eta2p3[itau] and mu_pt10_eta2p4_looseID_looseISO[imu] and (Delta_R(taueta[itau], mueta[imu], tauphi[itau], muphi[imu]) > 0.4))
                     # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
                     if debug_:print "pass_itau_imu_ = ", pass_itau_imu_
-                    tauCleanAgainstMu.append(len(WhereIsTrue(pass_itau_imu_)) == len(pass_itau_imu_))
+                    tauCleanAgainstMu.append(len(boolutil.WhereIsTrue(pass_itau_imu_)) == len(pass_itau_imu_))
                     if debug_:print "tauCleanAgainstMu = ", tauCleanAgainstMu
 
-                tauCleaned = logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
-                pass_tau_index_cleaned = WhereIsTrue(tauCleaned,3)
+                tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
+                pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned,3)
                 if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
 
             # -------------------------------------------------------------
@@ -676,7 +694,7 @@ def runbbdm(infile_):
                     if ee_mass > 70.0 and ee_mass < 110.0 and ZeeRecoilPt > 200.:
                         ZeeRecoil[0] = ZeeRecoilPt
                         ZeeMass[0] = ee_mass
-                        ZeePhi[0] = arctan(zeeRecoilPx,zeeRecoilPy)
+                        ZeePhi[0] = mathutil.ep_arctan(zeeRecoilPx,zeeRecoilPy)
             ## for dimu
             if len(pass_mu_index) ==2:
                 imu1=pass_mu_index[0]
@@ -689,7 +707,7 @@ def runbbdm(infile_):
                     if mumu_mass > 70.0 and mumu_mass < 110.0 and ZmumuRecoilPt > 200.:
                         ZmumuRecoil[0] = ZmumuRecoilPt
                         ZmumuMass[0] = mumu_mass
-                        ZmumuPhi[0] = arctan(zmumuRecoilPx,zmumuRecoilPy)
+                        ZmumuPhi[0] = mathutil.ep_arctan(zmumuRecoilPx,zmumuRecoilPy)
             if len(pass_ele_index) == 2:
                 ZRecoilstatus =(ZeeRecoil[0] > 200)
             elif len(pass_mu_index) == 2:
@@ -711,7 +729,7 @@ def runbbdm(infile_):
                if WenuRecoilPt > 200.:
                    WenuRecoil[0] = WenuRecoilPt
                    Wenumass[0] = e_mass
-                   WenuPhi[0] = arctan(WenuRecoilPx,WenuRecoilPy)
+                   WenuPhi[0] = mathutil.ep_arctan(WenuRecoilPx,WenuRecoilPy)
             ## for Single muon
             if len(pass_mu_index) == 1:
                mu1 = pass_mu_index[0]
@@ -722,7 +740,7 @@ def runbbdm(infile_):
                if WmunuRecoilPt > 200.:
                    WmunuRecoil[0] = WmunuRecoilPt
                    Wmunumass[0] = mu_mass
-                   WmunuPhi[0] = arctan(WmunuRecoilPx,WmunuRecoilPy)
+                   WmunuPhi[0] = mathutil.ep_arctan(WmunuRecoilPx,WmunuRecoilPy)
             if len(pass_ele_index) == 1:
                 WRecoilstatus =(WenuRecoil[0] > 200)
             elif len(pass_mu_index) == 1:
@@ -742,7 +760,7 @@ def runbbdm(infile_):
                GammaRecoilPt = math.sqrt(GammaRecoilPx**2  +  GammaRecoilPy**2)
                if GammaRecoilPt > 200.:
                    GammaRecoil[0] = GammaRecoilPt
-                   GammaPhi[0] = arctan(GammaRecoilPx,GammaRecoilPy)
+                   GammaPhi[0] = mathutil.ep_arctan(GammaRecoilPx,GammaRecoilPy)
             GammaRecoilStatus = (GammaRecoil[0] > 200)
             if debug_: print 'Reached Gamma CR'
 
