@@ -1,0 +1,9 @@
+filters2016=["Flag_HBHENoiseFilter",
+             "Flag_globalTightHalo2016Filter",
+             "Flag_eeBadScFilter",
+             "Flag_goodVertices",
+             "Flag_EcalDeadCellTriggerPrimitiveFilter",
+             "Flag_BadPFMuonFilter",
+             "Flag_HBHENoiseIsoFilter"]
+filters2017=["none"]
+filters2018=["none"]
