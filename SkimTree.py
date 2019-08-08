@@ -15,7 +15,7 @@ import time
 ################################################################################################################
 ##---changes to be made: 
 ##--- 1. one trigger flag for one physics object or one CR 
-##--- 2. write trigger list in another python file 
+##--------- 2. write trigger list in another python file 
 ##--- 3. filter list in another python file 
 ##--- 4. import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
 ##--- 5. rename jetvariables and move to a new file 
@@ -27,10 +27,16 @@ import time
 from multiprocessing import Process
 import multiprocessing as mp
 
+
+
+
+## user packages 
 sys.path.append('utils')
 sys.path.append('../utils')
 from MathUtils import *
 
+import  triggers as trig
+import variables as branches 
 print "starting clock"
 start = time.clock()
 
@@ -67,24 +73,23 @@ def arctan(x,y):
     else:
         return math.pi/2+corr
 
-def getPT_skim(P4):
-    return P4.Pt()
-
 def runbbdm(infile_):
+    
     debug_ = False
+    
     outputfilename = args.outputfile
-#    NEntries = 1000
     h_total = TH1F('h_total','h_total',2,0,2)
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
-
-    triglist=["HLT_PFMET170_BeamHaloCleaned_v","HLT_PFMET170_HBHE_BeamHaloCleaned_v","HLT_PFMET170_NotCleaned_v","HLT_PFMET170_NoiseCleaned_v","HLT_PFMET170_JetIdCleaned_v","HLT_PFMET170_HBHECleaned_v","HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v","HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_v","HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v","HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v","HLT_PFMET110_PFMHT110_IDTight_v","HLT_IsoMu24_v","HLT_IsoTkMu24_v","HLT_IsoMu27_v","HLT_IsoTkMu27_v","HLT_Ele27_WPTight_Gsf_v","HLT_Ele105_CaloIdVT_GsfTrkIdT_v","HLT_Ele115_CaloIdVT_GsfTrkIdT_v","HLT_Ele32_WPTight_Gsf_v","HLT_IsoMu20_v","HLT_Ele27_eta2p1_WPTight_Gsf_v","HLT_Ele27_WPLoose_Gsf_v","HLT_Ele32_eta2p1_WPTight_Gsf_v","HLT_Photon165_HE10_v","HLT_Photon175_v"]
-
+    
+    triglist = trig.trigger2016
+    
 
     outfile = TFile(outfilename,'RECREATE')
 
     outTree = TTree( 'outTree', 'tree branches' )
     
-    jetvariables = ['runId','lumiSection','eventId','isData','mcWeight','pu_nTrueInt','pu_nPUVert','hlt_trigName','hlt_trigResult','hlt_filterName','hlt_filterResult','pfMetCorrPt','pfMetCorrPhi','pfMetCorrUnc','nEle','elePx','elePy','elePz','eleEnergy','eleIsPassLoose','eleIsPassTight','eleCharge','nPho','phoPx','phoPy','phoPz','phoEnergy','phoIsPassLoose','phoIsPassTight','nMu','muPx','muPy','muPz','muEnergy','isLooseMuon','isTightMuon','muChHadIso','muNeHadIso','muGamIso','muPUPt','muCharge','HPSTau_n','HPSTau_Px','HPSTau_Py','HPSTau_Pz','HPSTau_Energy','disc_decayModeFinding','disc_byLooseIsolationMVArun2v1DBoldDMwLT2016','nGenPar','genParId','genMomParId','genParSt','genPx','genPy','genPz','genEnergy','THINnJet', 'THINjetPx', 'THINjetPy', 'THINjetPz', 'THINjetEnergy','THINjetPassIDTight','THINjetDeepCSV_b', 'THINjetHadronFlavor', 'THINjetNHadEF', 'THINjetCHadEF', 'THINjetCEmEF', 'THINjetPhoEF', 'THINjetEleEF', 'THINjetMuoEF', 'THINjetCorrUncUp','THINjetNPV']
+    jetvariables = branches.allvars2016
+    
     filename = infile_
     ieve = 0;icount = 0
     for df in read_root(filename, columns=jetvariables, chunksize=125000):
@@ -276,6 +281,8 @@ def runbbdm(infile_):
 
         outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
         outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
+        
+        
         for run,lumi,event,isData,mcWeight_,pu_nTrueInt_,pu_nPUVert_,trigName_,trigResult_,filterName,filterResult,met_,metphi_,metUnc_,nele_,elepx_,elepy_,elepz_,elee_,elelooseid_,eleTightid_,eleCharge_,npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muChHadIso_,muNeHadIso_,muGamIso_,muPUPt_,muCharge_,nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_ in zip(df.runId,df.lumiSection,df.eventId,df.isData,df.mcWeight,df.pu_nTrueInt,df.pu_nPUVert,df.hlt_trigName,df.hlt_trigResult,df.hlt_filterName,df.hlt_filterResult,df.pfMetCorrPt,df.pfMetCorrPhi,df.pfMetCorrUnc,df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassLoose,df.eleIsPassTight,df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.muChHadIso,df.muNeHadIso,df.muGamIso,df.muPUPt,df.muCharge,df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2v1DBoldDMwLT2016,df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genPx,df.genPy,df.genPz,df.genEnergy,df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV):
             if ieve%500==0: print "Processed",ieve,"Events"
             ieve = ieve + 1
