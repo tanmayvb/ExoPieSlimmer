@@ -63,12 +63,6 @@ start = time.clock()
 outfilename= 'SkimmedTree.root'
 
 
-## ---- make these variables configurable if they are really needed 
-PUPPI = True
-CA15  = False
-
-
-
 ## ----- command line argument 
 usage = "analyzer for bb+DM (debugging) "
 parser = argparse.ArgumentParser(description=usage)
@@ -87,8 +81,6 @@ infilename = "NCUGlobalTuples.root"
 
 
 
-
-
 def runbbdm(infile_):
     
     debug_ = False
@@ -99,7 +91,6 @@ def runbbdm(infile_):
     
     triglist = trig.trigger2016
     
-
     outfile = TFile(outfilename,'RECREATE')
 
     outTree = TTree( 'outTree', 'tree branches' )
@@ -109,7 +100,6 @@ def runbbdm(infile_):
     filename = infile_
     ieve = 0;icount = 0
     for df in read_root(filename, columns=jetvariables, chunksize=125000):
-        #samplepath = TNamed('samplepath', str(infile))
 
         st_runId                  = numpy.zeros(1, dtype=int)
         st_lumiSection            = array( 'L', [ 0 ] )
@@ -121,12 +111,13 @@ def runbbdm(infile_):
         st_pfMetUncJetEnUp        = ROOT.std.vector('float')()
         st_pfMetUncJetEnDown      = ROOT.std.vector('float')()
         st_isData                 = array( 'b', [ 0 ] )
-
-        #for trigs in triglist:
-        #    exec("st_"+trigs+"  = array( 'b', [ 0 ] )")
-
-        maxn = 10
-
+        
+        st_eleTrig                = array( 'b', [0] )
+        st_muTrig                = array( 'b', [0] )
+        st_metTrig                = array( 'b', [0] )
+        st_phoTrig                = array( 'b', [0] )
+        
+        
         st_THINnJet                     = array( 'L', [ 0 ] ) #ROOT.std.vector('int')()
         st_THINjetPx                    = ROOT.std.vector('float')()
         st_THINjetPy                    = ROOT.std.vector('float')()
@@ -319,17 +310,28 @@ def runbbdm(infile_):
             ## Trigger selection
             # -------------------------------------------------
             
-            trigdecision=False
-            trigstatus=[False for itrig in range(len(triglist))]
-            for itrig in range(len(triglist)):
-                trigstatus[itrig] = anautil.CheckFilter(trigName_, trigResult_, triglist[itrig])
+            eletrigdecision=False 
+            mudecision=False 
+            metdecision=False 
+            phodecision=False 
+            
+            eletrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.Electrontrigger2017[itrig] ) ) for itrig in range(len(trig.Electrontrigger2017))]
+            mutrigstatus  = [( anautil.CheckFilter(trigName_, trigResult_, trig.Muontrigger2017[itrig]     ) ) for itrig in range(len(trig.Muontrigger2017))    ]
+            mettrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.METrigger2017[itrig]       ) ) for itrig in range(len(trig.METtrigger2017))     ]
+            photrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.Photontrigger2017[itrig]   ) ) for itrig in range(len(trig.Photontrigger2017))  ]
+            
+            eletrigdecision = boolutil.logical_OR(eletrigstatus)
+            mutrigdecision  = boolutil.logical_OR(mutrigstatus)
+            mettrigdecision = boolutil.logical_OR(mettrigstatus)
+            photrigdecision = boolutil.logical_OR(photrigstatus)
+            
+            if not isData:
+                eletrigdecision = True
+                mutrigdecision = True
+                mettrigdecision = True
+                photrigdecision = True
                 
-            #print trigstatus
-            trigdecision = boolutil.logical_OR(trigstatus)
-            #print " trigdecision = ", trigdecision
-            if not isData: trigdecision=True
-            if not trigdecision: continue
-
+        
             # ------------------------------------------------------
             ## Filter selection
             # ------------------------------------------------------
@@ -342,6 +344,8 @@ def runbbdm(infile_):
             if isData:         filterdecision  = boolutil.logical_OR(filterstatus)
             
             if filterdecision == False: continue
+
+            
 
             # ------------------------------------------------------
             ## PFMET Selection
