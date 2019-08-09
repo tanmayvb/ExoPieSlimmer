@@ -295,8 +295,8 @@ def runbbdm(infile_):
         pu_nTrueInt_,pu_nPUVert_,\
         trigName_,trigResult_,filterName,filterResult,\
         met_,metphi_,metUnc_,\
-        nele_,elepx_,elepy_,elepz_,elee_,elelooseid_,eleTightid_,eleCharge_,\
-        npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
+        nele_,elepx_,elepy_,elepz_,elee_,elevetoid_, elelooseid_,eleTightid_,\
+        eleCharge_, npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
         nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
         nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,\
         nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
@@ -311,7 +311,7 @@ def runbbdm(infile_):
                    df.pu_nTrueInt,df.pu_nPUVert,\
                    df.hlt_trigName,df.hlt_trigResult,df.hlt_filterName,df.hlt_filterResult,\
                    df.pfMetCorrPt,df.pfMetCorrPhi,df.pfMetCorrUnc,\
-                   df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassLoose,df.eleIsPassTight,\
+                   df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassVeto, df.eleIsPassLoose,df.eleIsPassTight,\
                    df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,\
                    df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.PFIsoLoose, df.PFIsoMedium, df.PFIsoTight, df.PFIsoVeryTight, df.muCharge,\
                    df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,\
@@ -411,8 +411,11 @@ def runbbdm(infile_):
             eleeta = [getEta(elepx_[ie], elepy_[ie], elepz_[ie]) for ie in range(nele_)]
             elephi = [getPhi(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
             
+            ele_pt10_eta2p5_vetoID   = [(elept[ie] > 10.0) and (elevetoid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_looseID  = [(elept[ie] > 10.0) and (elelooseid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
-            pass_ele_index = boolutil.WhereIsTrue(ele_pt10_eta2p5_looseID, 1)
+            ele_pt10_eta2p5_tightID  = [(elept[ie] > 30.0) and (eletightid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
+            
+            pass_ele_veto_index      = boolutil.WhereIsTrue(ele_pt10_eta2p5_vetoID, 1)
             
             
             '''
@@ -425,19 +428,12 @@ def runbbdm(infile_):
             mupt = [getPt(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
             mueta = [getEta(mupx_[imu], mupy_[imu], mupz_[imu]) for imu in range(nmu_)]
             muphi = [getPhi(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
-            #muIso_ = [((muChHadIso_[imu]+ max(0., muNeHadIso_[imu] + muGamIso_[imu] - 0.5*muPUPt_[imu]))/mupt[imu]) for imu in range(nmu_)]
-
-            mu_pt10 = [(mupt[imu] > 10.0) for imu in range(nmu_)]
-            mu_eta2p4 = [(abs(mueta[imu]) < 2.4) for imu in range(nmu_)]
-            mu_IDLoose = [mulooseid_[imu] for imu in range(nmu_)]
-            mu_IsoLoose = muisoloose   #[(muIso_[imu] < 0.25) for imu in range(nmu_)]
-
-            mu_pt10_eta2p4_looseID_looseISO = []
-            if len(mu_pt10) > 0:
-                mu_pt10_eta2p4_looseID_looseISO = boolutil.logical_AND_List2(mu_IDLoose, mu_IsoLoose)
-
+            
+            mu_pt10_eta2p4_looseID_looseISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mulooseid_[imu])  and (muisoloose[imu]) )  for imu in range(nmu_) ]
+            mu_pt30_eta2p4_tightID_tightISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mutightid_[imu])  and (muisotight[imu]) )  for imu in range(nmu_) ]
+            
             pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO, 1)
-            if debug_: print "pass_mu_index",pass_mu_index
+
 
             '''
             *******   *****   *******
@@ -449,15 +445,10 @@ def runbbdm(infile_):
             ak4pt = [getPt(ak4px_[ij], ak4py_[ij]) for ij in range(nak4jet_)]
             ak4eta = [getEta(ak4px_[ij], ak4py_[ij], ak4pz_[ij]) for ij in range(nak4jet_)]
             ak4phi = [getPhi(ak4px_[ij], ak4py_[ij]) for ij in range(nak4jet_)]
-            ak4_IDTightVeto = [ak4TightID_[ij] for ij in range(nak4jet_)]
 
-            ak4_pt30 = [(ak4pt[ij] > 30.0) for ij in range(nak4jet_)]
-            ak4_eta4p5 = [(abs(ak4eta[ij]) < 4.5) for ij in range(nak4jet_)]
-
-            ak4_pt30_eta4p5_IDT = []
-            if len(ak4_pt30) > 0:
-                ak4_pt30_eta4p5_IDT = boolutil.logical_AND_List3(ak4_pt30, ak4_eta4p5, ak4_IDTightVeto)
-
+            ak4_pt30_eta4p5_IDT  = [ ( (ak4pt[ij] > 30.0) and (abs(ak4eta[ij]) < 4.5) and (ak4TightID_[ij] ) ) for ij in range(nak4jet_)]
+            
+            ##--- jet cleaning 
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
             pass_jet_index_cleaned = []
