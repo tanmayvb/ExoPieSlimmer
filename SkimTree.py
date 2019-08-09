@@ -60,7 +60,6 @@ start = time.clock()
 
 
 
-outfilename= 'SkimmedTree.root'
 
 
 ## ----- command line argument 
@@ -82,6 +81,8 @@ infilename = "NCUGlobalTuples.root"
 
 
 def runbbdm(infile_):
+    prefix="Skimmed_"
+    outfilename= prefix+infile_.split("/")[-1]
     
     debug_ = False
     
@@ -99,7 +100,7 @@ def runbbdm(infile_):
     
     filename = infile_
     ieve = 0;icount = 0
-    for df in read_root(filename, columns=jetvariables, chunksize=75000):
+    for df in read_root(filename, columns=jetvariables, chunksize=125000):
 
         st_runId                  = numpy.zeros(1, dtype=int)
         st_lumiSection            = array( 'L', [ 0 ] )
@@ -156,7 +157,7 @@ def runbbdm(infile_):
         st_muPz                = ROOT.std.vector('float')()
         st_muEnergy            = ROOT.std.vector('float')()
         st_isTightMuon         = ROOT.std.vector('bool')()
-        st_muIso               = ROOT.std.vector('float')()
+        #st_muIso               = ROOT.std.vector('float')()
 
         st_HPSTau_n= array( 'L', [ 0 ] ) #ROOT.std.vector('int')()
         st_nTauTightElectron= array( 'L', [ 0 ] )
@@ -249,7 +250,7 @@ def runbbdm(infile_):
         outTree.Branch( 'st_muPz', st_muPz)
         outTree.Branch( 'st_muEnergy', st_muEnergy)
         outTree.Branch( 'st_isTightMuon', st_isTightMuon)#, 'st_isTightMuon/O' )
-        outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
+        #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
 
         outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
         outTree.Branch( 'st_nTauTightElectron', st_nTauTightElectron, 'st_nTauTightElectron/L')
@@ -296,7 +297,7 @@ def runbbdm(infile_):
         met_,metphi_,metUnc_,\
         nele_,elepx_,elepy_,elepz_,elee_,elelooseid_,eleTightid_,eleCharge_,\
         npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
-        nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muChHadIso_,muNeHadIso_,muGamIso_,muPUPt_,muCharge_,\
+        nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
         nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,\
         nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
         nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
@@ -307,7 +308,7 @@ def runbbdm(infile_):
                    df.pfMetCorrPt,df.pfMetCorrPhi,df.pfMetCorrUnc,\
                    df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassLoose,df.eleIsPassTight,\
                    df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,\
-                   df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.muChHadIso,df.muNeHadIso,df.muGamIso,df.muPUPt,df.muCharge,\
+                   df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.PFIsoLoose, df.PFIsoMedium, df.PFIsoTight, df.PFIsoVeryTight, df.muCharge,\
                    df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,\
                    df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
                    df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
@@ -415,12 +416,12 @@ def runbbdm(infile_):
             mupt = [getPt(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
             mueta = [getEta(mupx_[imu], mupy_[imu], mupz_[imu]) for imu in range(nmu_)]
             muphi = [getPhi(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
-            muIso_ = [((muChHadIso_[imu]+ max(0., muNeHadIso_[imu] + muGamIso_[imu] - 0.5*muPUPt_[imu]))/mupt[imu]) for imu in range(nmu_)]
+            #muIso_ = [((muChHadIso_[imu]+ max(0., muNeHadIso_[imu] + muGamIso_[imu] - 0.5*muPUPt_[imu]))/mupt[imu]) for imu in range(nmu_)]
 
             mu_pt10 = [(mupt[imu] > 10.0) for imu in range(nmu_)]
             mu_eta2p4 = [(abs(mueta[imu]) < 2.4) for imu in range(nmu_)]
             mu_IDLoose = [mulooseid_[imu] for imu in range(nmu_)]
-            mu_IsoLoose = [(muIso_[imu] < 0.25) for imu in range(nmu_)]
+            mu_IsoLoose = muisoloose   #[(muIso_[imu] < 0.25) for imu in range(nmu_)]
 
             mu_pt10_eta2p4_looseID_looseISO = []
             if len(mu_pt10) > 0:
@@ -582,7 +583,7 @@ def runbbdm(infile_):
             st_muPz.clear()
             st_muEnergy.clear()
             st_isTightMuon.clear()
-            st_muIso.clear()
+            #st_muIso.clear()
 
             st_phoPx.clear()
             st_phoPy.clear()
@@ -632,7 +633,7 @@ def runbbdm(infile_):
                 st_muPz.push_back(mupz_[imu])
                 st_muEnergy.push_back(mue_[imu])
                 st_isTightMuon.push_back(bool(mutightid_[imu]))
-                st_muIso.push_back(muIso_[imu])
+                #st_muIso.push_back(muIso_[imu])
             if debug_:print 'nMu: ',len(pass_mu_index)
 
             st_HPSTau_n[0] = len(pass_tau_index_cleaned)
@@ -787,11 +788,11 @@ def runbbdm(infile_):
     end = time.clock()
     print "%.4gs" % (end-start)
 
-files=["/tmp/khurana/Merged_DYJets400-600.root"]
+files=["/tmp/khurana/Merged_DYJets_400_600.root","/tmp/khurana/Merged_DYJets_400_600_1.root"]
 
 if __name__ == '__main__':
     try:
-        pool = mp.Pool(1)
+        pool = mp.Pool(2)
         pool.map(runbbdm, files)
         pool.close()
     except Exception as e:

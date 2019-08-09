@@ -40,10 +40,14 @@ allvars2016=['runId',
              'muEnergy',
              'isLooseMuon',
              'isTightMuon',
-             'muChHadIso',
-             'muNeHadIso',
-             'muGamIso',
-             'muPUPt',
+             #'muChHadIso',
+             #'muNeHadIso',
+             #'muGamIso',
+             #'muPUPt',
+             'PFIsoLoose', #-- < 0.25
+             'PFIsoMedium', #-- < 0.20
+             'PFIsoTight', #-- < 0.15
+             'PFIsoVeryTight', #-- < 0.10
              'muCharge',
              
              'HPSTau_n',
