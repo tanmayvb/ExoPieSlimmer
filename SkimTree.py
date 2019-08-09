@@ -23,8 +23,9 @@ import time
 ##--------- 5. rename jetvariables and move to a new file 
 ##--- 6. move https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L183-L273 into a function
 ##--- 7. add AK8 jet information
-##--- 8. update the variable names
-##--- 9. use the out of new ExoPieElement as input for the skimmer
+##-------- 8. update the variable names
+##-------- 9. use the out of new ExoPieElement as input for the skimmer
+##--- 10. convert this to function: https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L455-L462
 ################################################################################################################
 from multiprocessing import Process
 import multiprocessing as mp
@@ -80,6 +81,23 @@ infilename = "NCUGlobalTuples.root"
 
 
 
+'''
+in progress
+def jetcleaning():
+    jetCleanAgainstLep = []
+    pass_jet_index_cleaned = []
+    if len(ak4_pt30_eta4p5_IDT) > 0:
+        for ijet in range(len(ak4_pt30_eta4p5_IDT)):
+            pass_ijet_iele_ = []
+            for iele in range(len(ele_pt10_eta2p5_looseID)):
+                pass_ijet_iele_.append(ak4_pt30_eta4p5_IDT[ijet] and ele_pt10_eta2p5_looseID[iele] and (Delta_R(ak4eta[ijet], eleeta[iele], ak4phi[ijet], elephi[iele]) > 0.4))
+                # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
+            jetCleanAgainstLep.append(len(boolutil.WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
+            if debug_:
+                print "pass_ijet_iele_ = ", pass_ijet_iele_
+                print "jetCleanAgainstLep = ", jetCleanAgainstLep
+    return jetCleanAgainstLep
+'''
 def runbbdm(infile_):
     prefix="Skimmed_"
     outfilename= prefix+infile_.split("/")[-1]
@@ -447,6 +465,9 @@ def runbbdm(infile_):
             ak4phi = [getPhi(ak4px_[ij], ak4py_[ij]) for ij in range(nak4jet_)]
 
             ak4_pt30_eta4p5_IDT  = [ ( (ak4pt[ij] > 30.0) and (abs(ak4eta[ij]) < 4.5) and (ak4TightID_[ij] ) ) for ij in range(nak4jet_)]
+            
+            
+            #ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_looseID, ak4eta, eleeta, ak4phi, elephi, DRCut
             
             ##--- jet cleaning 
             jetCleanAgainstEle = []
