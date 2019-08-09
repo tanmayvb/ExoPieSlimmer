@@ -89,7 +89,7 @@ allvars2017=['runId',
              'THINjetEleEF', 
              'THINjetMuoEF',
              'THINjetCorrUncUp',
-             'THINjetNPV'
+             'THINjetNPV',
              
              'FATnJet',
              'FATjetPx',
