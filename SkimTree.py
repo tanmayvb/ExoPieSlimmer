@@ -17,9 +17,9 @@ import time
 ##--------- 1. one trigger flag for one physics object or one CR 
 ##--------- 2. write trigger list in another python file 
 ##--------- 3. filter list in another python file 
-##--- 4.  import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
-##--- 4.1 tried it, it is very difficult, its better to write own class p4. and use it for all kind of operation. in this one can implement, the functions 
-##---      pt, eta, phi, mass, delta R, delta phi, + , -  (anything else we use?) 
+##--------- 4.  import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
+##--------- 4.1 tried it, it is very difficult, its better to write own class p4. and use it for all kind of operation. in this one can implement, the functions 
+##---------      pt, eta, phi, mass, delta R, delta phi, + , -  (anything else we use?) 
 ##--------- 5. rename jetvariables and move to a new file 
 ##--- 6. move https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L183-L273 into a function
 ##--- 7. add AK8 jet information
@@ -88,19 +88,6 @@ infilename = "NCUGlobalTuples.root"
 
 
 
-## ---- move this to mathutils, see if these checks are needed, and how can they be performed without ROOT, 
-def arctan(x,y):
-    corr=0
-    if (x>0 and y>=0) or (x>0 and y<0):
-        corr=0
-    elif x<0 and y>=0:
-        corr=math.pi
-    elif x<0 and y<0:
-        corr=-math.pi
-    if x!=0.:
-        return math.atan(y/x)+corr
-    else:
-        return math.pi/2+corr
 
 def runbbdm(infile_):
     
