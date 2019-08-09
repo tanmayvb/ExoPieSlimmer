@@ -96,7 +96,7 @@ def runbbdm(infile_):
 
     outTree = TTree( 'outTree', 'tree branches' )
     
-    jetvariables = branches.allvars2016
+    jetvariables = branches.allvars2017
     
     filename = infile_
     ieve = 0;icount = 0
@@ -302,9 +302,14 @@ def runbbdm(infile_):
         nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
         nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
         ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
-        ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_\
+        ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_,\
+        fatnJet, fatjetPx, fatjetPy, fatjetPz, fatjetEnergy,\
+        fatjet_DoubleSV, fatjet_probQCDb, fatjet_probHbb, fatjet_probQCDc, fatjet_probHcc, fatjet_probHbbc,\
+        fatjet_prob_bbvsLight, fatjet_prob_ccvsLight, fatjet_prob_TvsQCD, fatjet_prob_WvsQCD, fatjet_prob_ZHbbvsQCD,\
+        fatjetSDmass, fatN2_Beta1_, fatN2_Beta2_, fatjetCHSPRmassL2L3Corr, fatjetCHSSDmassL2L3Corr\
         in zip(df.runId,df.lumiSection,df.eventId,df.isData,df.mcWeight,\
-                   df.pu_nTrueInt,df.pu_nPUVert,df.hlt_trigName,df.hlt_trigResult,df.hlt_filterName,df.hlt_filterResult,\
+                   df.pu_nTrueInt,df.pu_nPUVert,\
+                   df.hlt_trigName,df.hlt_trigResult,df.hlt_filterName,df.hlt_filterResult,\
                    df.pfMetCorrPt,df.pfMetCorrPhi,df.pfMetCorrUnc,\
                    df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassLoose,df.eleIsPassTight,\
                    df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,\
@@ -313,7 +318,11 @@ def runbbdm(infile_):
                    df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
                    df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
                    df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
-                   df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV):
+                   df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV, \
+                   df.FATnJet, df.FATjetPx, df.FATjetPy, df.FATjetPz, df.FATjetEnergy,\
+                   df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
+                   df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
+                   df.FATjetSDmass, df.FATN2_Beta1_, df.FATN2_Beta2_, df.FATjetCHSPRmassL2L3Corr, df.FATjetCHSSDmassL2L3Corr               ):
             
 
             if ieve%1000==0: print "Processed",ieve,"Events"
