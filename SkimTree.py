@@ -70,6 +70,8 @@ parser.add_argument("-i", "--inputfile",  dest="inputfile")
 parser.add_argument("-o", "--outputfile", dest="outputfile", default="out.root")
 parser.add_argument("-D", "--outputdir", dest="outputdir")
 parser.add_argument("-F", "--farmout", action="store_true",  dest="farmout")
+## add argument for debug, default to be false
+
 args = parser.parse_args()
 
 if args.farmout==None:
@@ -79,30 +81,31 @@ else:
 
 infilename = "NCUGlobalTuples.root"
 
+debug_ = False
 
 
-'''
-in progress
-def jetcleaning():
+
+def jetcleaning(ak4_pt30_eta4p5_IDT, lep_looseID, ak4eta, lepeta, ak4phi, lepphi, DRCut):
+    ## usage: (obj_to_clean, obj_cleaned_against, so on
+    if debug_: print "njet, nlep", len(ak4_pt30_eta4p5_IDT), len(lep_looseID)
     jetCleanAgainstLep = []
     pass_jet_index_cleaned = []
     if len(ak4_pt30_eta4p5_IDT) > 0:
         for ijet in range(len(ak4_pt30_eta4p5_IDT)):
-            pass_ijet_iele_ = []
-            for iele in range(len(ele_pt10_eta2p5_looseID)):
-                pass_ijet_iele_.append(ak4_pt30_eta4p5_IDT[ijet] and ele_pt10_eta2p5_looseID[iele] and (Delta_R(ak4eta[ijet], eleeta[iele], ak4phi[ijet], elephi[iele]) > 0.4))
+            pass_ijet_ilep_ = []
+            for ilep in range(len(lep_looseID)):
+                pass_ijet_ilep_.append(ak4_pt30_eta4p5_IDT[ijet] and lep_looseID[ilep] and (Delta_R(ak4eta[ijet], lepeta[ilep], ak4phi[ijet], lepphi[ilep]) > 0.4))
+            if debug_: print "-------- pass_ijet_ilep_ = ",pass_ijet_ilep_
                 # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-            jetCleanAgainstLep.append(len(boolutil.WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
-            if debug_:
-                print "pass_ijet_iele_ = ", pass_ijet_iele_
-                print "jetCleanAgainstLep = ", jetCleanAgainstLep
+            jetCleanAgainstLep.append(len(boolutil.WhereIsTrue(pass_ijet_ilep_)) == len(pass_ijet_ilep_))
+            if debug_: print "inside function pass_ijet_ilep_ = ", pass_ijet_ilep_
+            if debug_: print "inside function jetCleanAgainstLep = ", jetCleanAgainstLep
     return jetCleanAgainstLep
-'''
+
 def runbbdm(infile_):
     prefix="Skimmed_"
     outfilename= prefix+infile_.split("/")[-1]
     
-    debug_ = False
     
     outputfilename = args.outputfile
     h_total = TH1F('h_total','h_total',2,0,2)
@@ -313,7 +316,7 @@ def runbbdm(infile_):
         pu_nTrueInt_,pu_nPUVert_,\
         trigName_,trigResult_,filterName,filterResult,\
         met_,metphi_,metUnc_,\
-        nele_,elepx_,elepy_,elepz_,elee_,elevetoid_, elelooseid_,eleTightid_,\
+        nele_,elepx_,elepy_,elepz_,elee_,elevetoid_, elelooseid_,eletightid_,\
         eleCharge_, npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
         nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
         nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,\
@@ -429,7 +432,7 @@ def runbbdm(infile_):
             eleeta = [getEta(elepx_[ie], elepy_[ie], elepz_[ie]) for ie in range(nele_)]
             elephi = [getPhi(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
             
-            ele_pt10_eta2p5_vetoID   = [(elept[ie] > 10.0) and (elevetoid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
+            ele_pt10_eta2p5_vetoID   = [(elept[ie] > 10.0) and (elevetoid_[ie])  and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_looseID  = [(elept[ie] > 10.0) and (elelooseid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_tightID  = [(elept[ie] > 30.0) and (eletightid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             
@@ -473,17 +476,27 @@ def runbbdm(infile_):
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
             pass_jet_index_cleaned = []
+            
+            
             if len(ak4_pt30_eta4p5_IDT) > 0:
+                DRCut = 0.4
+                jetCleanAgainstEle = jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_looseID, ak4eta, eleeta, ak4phi, elephi, DRCut)
+                jetCleanAgainstMu  = jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
+                
+                '''
                 for ijet in range(len(ak4_pt30_eta4p5_IDT)):
                     pass_ijet_iele_ = []
                     for iele in range(len(ele_pt10_eta2p5_looseID)):
                         pass_ijet_iele_.append(ak4_pt30_eta4p5_IDT[ijet] and ele_pt10_eta2p5_looseID[iele] and (
                             Delta_R(ak4eta[ijet], eleeta[iele], ak4phi[ijet], elephi[iele]) > 0.4))
                     # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
+                    print "-------------pass_ijet_iele_ = ", len(ak4_pt30_eta4p5_IDT), len(ele_pt10_eta2p5_looseID), pass_ijet_iele_
                     jetCleanAgainstEle.append(len(boolutil.WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
+                    print pass_ijet_iele_
                     if debug_:
                         print "pass_ijet_iele_ = ", pass_ijet_iele_
                         print "jetCleanAgainstEle = ", jetCleanAgainstEle
+                
                 for ijet in range(len(ak4_pt30_eta4p5_IDT)):
                     pass_ijet_imu_ = []
                     for imu in range(len(mu_pt10_eta2p4_looseID_looseISO)):
@@ -492,7 +505,7 @@ def runbbdm(infile_):
                     if debug_:print "pass_ijet_imu_ = ", pass_ijet_imu_
                     jetCleanAgainstMu.append(len(boolutil.WhereIsTrue(pass_ijet_imu_)) == len(pass_ijet_imu_))
                     if debug_:print "jetCleanAgainstMu = ", jetCleanAgainstMu
-
+                '''
                 jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned, 3)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
@@ -638,14 +651,14 @@ def runbbdm(infile_):
                 st_THINjetCorrUnc.push_back(ak4JEC_[ithinjet])
             if debug_:print 'njets: ',len(pass_jet_index_cleaned)
 
-            st_nEle[0] = len(pass_ele_index)
-            for iele in pass_ele_index:
+            st_nEle[0] = len(pass_ele_veto_index)
+            for iele in pass_ele_veto_index:
                 st_elePx.push_back(elepx_[iele])
                 st_elePy.push_back(elepy_[iele])
                 st_elePz.push_back(elepz_[iele])
                 st_eleEnergy.push_back(elee_[iele])
-                st_eleIsPassTight.push_back(bool(eleTightid_[iele]))
-            if debug_:print 'nEle: ',len(pass_ele_index)
+                st_eleIsPassTight.push_back(bool(eletightid_[iele]))
+            if debug_:print 'nEle: ',len(pass_ele_veto_index)
 
             st_nMu[0] = len(pass_mu_index)
             for imu in pass_mu_index:
@@ -718,9 +731,9 @@ def runbbdm(infile_):
             # Z CR
             # ------------------
             ## for dielectron
-            if len(pass_ele_index) == 2:
-                iele1=pass_ele_index[0]
-                iele2=pass_ele_index[1]
+            if len(pass_ele_veto_index) == 2:
+                iele1=pass_ele_veto_index[0]
+                iele2=pass_ele_veto_index[1]
                 if eleCharge_[iele1]*eleCharge_[iele2]<0:
                     ee_mass = InvMass(elepx_[iele1],elepy_[iele1],elepz_[iele1],elee_[iele1],elepx_[iele2],elepy_[iele2],elepz_[iele2],elee_[iele2])
                     zeeRecoilPx = -( met_*math.cos(metphi_) + elepx_[iele1] + elepx_[iele2])
@@ -743,7 +756,7 @@ def runbbdm(infile_):
                         ZmumuRecoil[0] = ZmumuRecoilPt
                         ZmumuMass[0] = mumu_mass
                         ZmumuPhi[0] = mathutil.ep_arctan(zmumuRecoilPx,zmumuRecoilPy)
-            if len(pass_ele_index) == 2:
+            if len(pass_ele_veto_index) == 2:
                 ZRecoilstatus =(ZeeRecoil[0] > 200)
             elif len(pass_mu_index) == 2:
                 ZRecoilstatus =(ZmumuRecoil[0] > 200)
@@ -755,8 +768,8 @@ def runbbdm(infile_):
             # W CR
             # ------------------
             ## for Single electron
-            if len(pass_ele_index) == 1:
-               ele1 = pass_ele_index[0]
+            if len(pass_ele_veto_index) == 1:
+               ele1 = pass_ele_veto_index[0]
                e_mass = MT(elept[ele1],met_, DeltaPhi(elephi[ele1],metphi_)) #transverse mass defined as sqrt{2pT*MET*(1-cos(dphi)}
                WenuRecoilPx = -( met_*math.cos(metphi_) + elepx_[ele1])
                WenuRecoilPy = -( met_*math.sin(metphi_) + elepy_[ele1])
@@ -776,7 +789,7 @@ def runbbdm(infile_):
                    WmunuRecoil[0] = WmunuRecoilPt
                    Wmunumass[0] = mu_mass
                    WmunuPhi[0] = mathutil.ep_arctan(WmunuRecoilPx,WmunuRecoilPy)
-            if len(pass_ele_index) == 1:
+            if len(pass_ele_veto_index) == 1:
                 WRecoilstatus =(WenuRecoil[0] > 200)
             elif len(pass_mu_index) == 1:
                 WRecoilstatus =(WmunuRecoil[0] > 200)
@@ -812,6 +825,8 @@ def runbbdm(infile_):
 files=["/tmp/khurana/Merged_DYJets_400_600.root","/tmp/khurana/Merged_DYJets_400_600_1.root"]
 
 if __name__ == '__main__':
+    runbbdm(files[0])
+    '''
     try:
         pool = mp.Pool(2)
         pool.map(runbbdm, files)
@@ -822,3 +837,4 @@ if __name__ == '__main__':
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
         pass
+    '''
