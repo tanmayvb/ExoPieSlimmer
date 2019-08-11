@@ -535,9 +535,9 @@ def runbbdm(infile_):
             tauCleanAgainstEle = []
             tauCleanAgainstMu = []
             pass_tau_index_cleaned = []
-            if len(tau_pt18_eta2p3)>0:
-                tauCleanAgainstEle = jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
-                tauCleanAgainstMu  = jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
+            if len(tau_eta2p3_iDLdm_pt18)>0:
+                tauCleanAgainstEle = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
+                tauCleanAgainstMu  = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
                 tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
                 pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned,3)
                 if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
