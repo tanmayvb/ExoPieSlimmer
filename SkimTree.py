@@ -84,7 +84,7 @@ infilename = "NCUGlobalTuples.root"
 debug_ = False
 
 
-
+'''
 def jetcleaning(ak4_pt30_eta4p5_IDT, lep_looseID, ak4eta, lepeta, ak4phi, lepphi, DRCut):
     ## usage: (obj_to_clean, obj_cleaned_against, so on
     if debug_: print "njet, nlep", len(ak4_pt30_eta4p5_IDT), len(lep_looseID)
@@ -101,7 +101,7 @@ def jetcleaning(ak4_pt30_eta4p5_IDT, lep_looseID, ak4eta, lepeta, ak4phi, lepphi
             if debug_: print "inside function pass_ijet_ilep_ = ", pass_ijet_ilep_
             if debug_: print "inside function jetCleanAgainstLep = ", jetCleanAgainstLep
     return jetCleanAgainstLep
-
+'''
 def runbbdm(infile_):
     prefix="Skimmed_"
     outfilename= prefix+infile_.split("/")[-1]
@@ -324,7 +324,7 @@ def runbbdm(infile_):
         nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
         ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
         ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_,\
-        fatnJet, fatjetPx, fatjetPy, fatjetPz, fatjetEnergy,\
+        fatnJet, fatjetPx, fatjetPy, fatjetPz, fatjetEnergy,fatjetTightID,\
         fatjet_DoubleSV, fatjet_probQCDb, fatjet_probHbb, fatjet_probQCDc, fatjet_probHcc, fatjet_probHbbc,\
         fatjet_prob_bbvsLight, fatjet_prob_ccvsLight, fatjet_prob_TvsQCD, fatjet_prob_WvsQCD, fatjet_prob_ZHbbvsQCD,\
         fatjetSDmass, fatN2_Beta1_, fatN2_Beta2_, fatjetCHSPRmassL2L3Corr, fatjetCHSSDmassL2L3Corr\
@@ -340,7 +340,7 @@ def runbbdm(infile_):
                    df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
                    df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
                    df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV, \
-                   df.FATnJet, df.FATjetPx, df.FATjetPy, df.FATjetPz, df.FATjetEnergy,\
+                   df.FATnJet, df.FATjetPx, df.FATjetPy, df.FATjetPz, df.FATjetEnergy, df.FATjetPassIDTight,\
                    df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                    df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
                    df.FATjetSDmass, df.FATN2_Beta1_, df.FATN2_Beta2_, df.FATjetCHSPRmassL2L3Corr, df.FATjetCHSSDmassL2L3Corr               ):
@@ -469,9 +469,6 @@ def runbbdm(infile_):
 
             ak4_pt30_eta4p5_IDT  = [ ( (ak4pt[ij] > 30.0) and (abs(ak4eta[ij]) < 4.5) and (ak4TightID_[ij] ) ) for ij in range(nak4jet_)]
             
-            
-            #ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_looseID, ak4eta, eleeta, ak4phi, elephi, DRCut
-            
             ##--- jet cleaning 
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
@@ -480,32 +477,9 @@ def runbbdm(infile_):
             
             if len(ak4_pt30_eta4p5_IDT) > 0:
                 DRCut = 0.4
-                jetCleanAgainstEle = jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_looseID, ak4eta, eleeta, ak4phi, elephi, DRCut)
-                jetCleanAgainstMu  = jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
+                jetCleanAgainstEle = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_vetoID, ak4eta, eleeta, ak4phi, elephi, DRCut)
+                jetCleanAgainstMu  = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
                 
-                '''
-                for ijet in range(len(ak4_pt30_eta4p5_IDT)):
-                    pass_ijet_iele_ = []
-                    for iele in range(len(ele_pt10_eta2p5_looseID)):
-                        pass_ijet_iele_.append(ak4_pt30_eta4p5_IDT[ijet] and ele_pt10_eta2p5_looseID[iele] and (
-                            Delta_R(ak4eta[ijet], eleeta[iele], ak4phi[ijet], elephi[iele]) > 0.4))
-                    # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    print "-------------pass_ijet_iele_ = ", len(ak4_pt30_eta4p5_IDT), len(ele_pt10_eta2p5_looseID), pass_ijet_iele_
-                    jetCleanAgainstEle.append(len(boolutil.WhereIsTrue(pass_ijet_iele_)) == len(pass_ijet_iele_))
-                    print pass_ijet_iele_
-                    if debug_:
-                        print "pass_ijet_iele_ = ", pass_ijet_iele_
-                        print "jetCleanAgainstEle = ", jetCleanAgainstEle
-                
-                for ijet in range(len(ak4_pt30_eta4p5_IDT)):
-                    pass_ijet_imu_ = []
-                    for imu in range(len(mu_pt10_eta2p4_looseID_looseISO)):
-                        pass_ijet_imu_.append(ak4_pt30_eta4p5_IDT[ijet] and mu_pt10_eta2p4_looseID_looseISO[imu] and (Delta_R(ak4eta[ijet], mueta[imu], ak4phi[ijet], muphi[imu]) > 0.4))
-                    # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    if debug_:print "pass_ijet_imu_ = ", pass_ijet_imu_
-                    jetCleanAgainstMu.append(len(boolutil.WhereIsTrue(pass_ijet_imu_)) == len(pass_ijet_imu_))
-                    if debug_:print "jetCleanAgainstMu = ", jetCleanAgainstMu
-                '''
                 jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned, 3)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
@@ -521,6 +495,28 @@ def runbbdm(infile_):
 
             
             '''
+            fatjetpt = [getPt(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
+            fatjeteta = [getEta(fatjetPx[ij], fatjetPy[ij], fatjetPz[ij]) for ij in range(fatnJet)]
+            fatjetphi = [getPhi(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
+            
+            fatjet_pt200_eta2p5_IDT  = [ ( (fatjetpt[ij] > 200.0) and (abs(fatjeteta[ij]) < 2.5) and (fatjetTightID[ij] ) ) for ij in range(fatnJet)]
+            
+            ##--- fat jet cleaning 
+            fatjetCleanAgainstEle = []
+            fatjetCleanAgainstMu = []
+            pass_fatjet_index_cleaned = []
+            
+            
+            if len(fatjet_pt200_eta2p5_IDT) > 0:
+                fatjetCleanAgainstEle = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, ele_pt10_eta2p5_vetoID, fatjeteta, eleeta, fatjetphi, elephi, DRCut)
+                fatjetCleanAgainstMu  = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, mu_pt10_eta2p4_looseID_looseISO, fatjeteta, mueta, fatjetphi, muphi, DRCut)
+                
+                fatjetCleaned = boolutil.logical_AND_List2(fatjetCleanAgainstEle, fatjetCleanAgainstMu)
+                pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned, 3)
+                if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetpx)
+                
+            
+            
             '''
             ********    *        *       *
                *      *    *     *       *
@@ -533,49 +529,20 @@ def runbbdm(infile_):
             taueta = [getEta(tau_px_[itau], tau_py_[itau], tau_pz_[itau]) for itau in range(nTau_)]
             tauphi = [getPhi(tau_px_[itau], tau_py_[itau]) for itau in range(nTau_)]
 
-            tau_pt18 = [(taupt[itau] > 18.0) for itau in range(nTau_)]
-            tau_eta2p3 = [(abs(taueta[itau]) < 2.3) for itau in range(nTau_)]
-            tau_IDLoose = [(tau_isLoose_[itau]) for itau in range(nTau_)]
-            tau_DM = [(tau_dm_[itau]) for itau in range(nTau_)]
-
-            tau_pt18_eta2p3 = []
-            if (len(tau_pt18) > 0 and len(tau_eta2p3) > 0):
-                tau_pt18_eta2p3 = boolutil.logical_AND_List2(tau_pt18, tau_eta2p3)
-            if debug_:print "tau_pt18_eta2p3 = ", tau_pt18_eta2p3
-
-            ''' take AND of all the tau cuts (just take the lists) '''
-            tau_eta2p3_iDLdm_pt18 = []
-            if (len(tau_eta2p3) > 0):
-                tau_eta2p3_iDLdm_pt18 = boolutil.logical_AND_List4(
-                    tau_eta2p3, tau_DM, tau_pt18,tau_IDLoose )
+            tau_eta2p3_iDLdm_pt18 = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) ) for itau in range(nTau_)]
             if debug_:print "tau_eta2p3_iDLdm_pt18 = ", tau_eta2p3_iDLdm_pt18
 
             tauCleanAgainstEle = []
             tauCleanAgainstMu = []
             pass_tau_index_cleaned = []
             if len(tau_pt18_eta2p3)>0:
-                for itau in range(len(tau_pt18_eta2p3)):
-                    pass_itau_iele_ = []
-                    for iele in range(len(ele_pt10_eta2p5_looseID)):
-                        pass_itau_iele_.append(tau_pt18_eta2p3[itau] and ele_pt10_eta2p5_looseID[iele] and (Delta_R(taueta[itau], eleeta[iele], tauphi[itau], elephi[iele]) > 0.4))
-                    # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    tauCleanAgainstEle.append(len(boolutil.WhereIsTrue(pass_itau_iele_)) == len(pass_itau_iele_))
-                    if debug_:
-                        print "pass_itau_iele_ = ", pass_itau_iele_
-                        print "tauCleanAgainstEle = ", tauCleanAgainstEle
-                for itau in range(len(tau_pt18_eta2p3)):
-                    pass_itau_imu_ = []
-                    for imu in range(len(mu_pt10_eta2p4_looseID_looseISO)):
-                        pass_itau_imu_.append(tau_pt18_eta2p3[itau] and mu_pt10_eta2p4_looseID_looseISO[imu] and (Delta_R(taueta[itau], mueta[imu], tauphi[itau], muphi[imu]) > 0.4))
-                    # if the number of true is equal to length of vector then it is ok to keep this jet, otherwise this is not cleaned
-                    if debug_:print "pass_itau_imu_ = ", pass_itau_imu_
-                    tauCleanAgainstMu.append(len(boolutil.WhereIsTrue(pass_itau_imu_)) == len(pass_itau_imu_))
-                    if debug_:print "tauCleanAgainstMu = ", tauCleanAgainstMu
-
+                tauCleanAgainstEle = jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
+                tauCleanAgainstMu  = jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
                 tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
                 pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned,3)
                 if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
-
+                
+                
             # -------------------------------------------------------------
             st_runId[0]             = long(run)
             st_lumiSection[0]       = lumi
@@ -822,7 +789,8 @@ def runbbdm(infile_):
     end = time.clock()
     print "%.4gs" % (end-start)
 
-files=["/tmp/khurana/Merged_DYJets_400_600.root","/tmp/khurana/Merged_DYJets_400_600_1.root"]
+#files=["/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_06082019/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190808_201541/0000/ExoPieElementTuples_232.root"]
+files=["/tmp/khurana/Merged_DYJets.root"]
 
 if __name__ == '__main__':
     runbbdm(files[0])
