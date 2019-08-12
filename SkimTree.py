@@ -12,6 +12,7 @@ from pandas import  DataFrame, concat
 from pandas import Series
 import time
 
+
 ################################################################################################################
 ##---changes to be made: 
 ##--------- 1. one trigger flag for one physics object or one CR 
@@ -38,7 +39,6 @@ import multiprocessing as mp
 import  triggers as trig
 import variables as branches 
 import filters as filters
-
 ## from commonutils
 sys.path.append('../ExoPieUtils/commonutils/')
 import MathUtils as mathutil
@@ -94,11 +94,17 @@ def runbbdm(infile_):
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
     
     triglist = trig.trigger2016
+    passfilename = open("outfilename.txt","w")
+    passfilename.write(outfilename)
+    passfilename.close()
     
+    from  outputTree  import *
+    
+    ''' 
     outfile = TFile(outfilename,'RECREATE')
 
     outTree = TTree( 'outTree', 'tree branches' )
-    
+    '''    
     jetvariables = branches.allvars2017
     
     filename = infile_
@@ -107,7 +113,7 @@ def runbbdm(infile_):
     ## ------------ ------------ ------------ ------------ ------------ ------------
     ## --------- branches: to be saved in the  skim tuple 
     ## ------------ ------------ ------------ ------------ ------------ ------------
-
+    '''
     st_runId                  = numpy.zeros(1, dtype=int)
     st_lumiSection            = array( 'L', [ 0 ] )
     st_eventId                = array( 'L', [ 0 ] )
@@ -176,38 +182,38 @@ def runbbdm(infile_):
     st_nTauLooseEleMu      = array( 'L', [ 0 ] )
     ## add against mu and against mu loose and medium WP 
     
-    mcweight = array( 'f', [ 0 ] )
-    st_pu_nTrueInt= array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()
-    st_pu_nPUVert= array( 'f', [ 0 ] )
-    st_THINjetNPV= array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()
+    mcweight               = array( 'f', [ 0 ] )
+    st_pu_nTrueInt         = array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()
+    st_pu_nPUVert          = array( 'f', [ 0 ] )
+    st_THINjetNPV          = array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()
     
-    st_nGenPar = array( 'L', [ 0 ] )
-    st_genParId = ROOT.std.vector('int')()
-    st_genMomParId = ROOT.std.vector('int')()
-    st_genParSt = ROOT.std.vector('int')()
-    st_genParPx = ROOT.std.vector('float')()
-    st_genParPy = ROOT.std.vector('float')()
-    st_genParPz = ROOT.std.vector('float')()
-    st_genParEnergy = ROOT.std.vector('float')()
+    st_nGenPar             = array( 'L', [ 0 ] )
+    st_genParId            = ROOT.std.vector('int')()
+    st_genMomParId         = ROOT.std.vector('int')()
+    st_genParSt            = ROOT.std.vector('int')()
+    st_genParPx            = ROOT.std.vector('float')()
+    st_genParPy            = ROOT.std.vector('float')()
+    st_genParPz            = ROOT.std.vector('float')()
+    st_genParEnergy        = ROOT.std.vector('float')()
 
-    WenuRecoil = array( 'f', [ 0. ] )
-    Wenumass = array( 'f', [ 0. ] )
-    WenuPhi = array( 'f', [ 0. ] )
+    WenuRecoil             = array( 'f', [ 0. ] )
+    Wenumass               = array( 'f', [ 0. ] )
+    WenuPhi                = array( 'f', [ 0. ] )
 
-    WmunuRecoil = array( 'f', [ 0. ] )
-    Wmunumass = array( 'f', [ 0. ] )
-    WmunuPhi = array( 'f', [ 0. ] )
+    WmunuRecoil            = array( 'f', [ 0. ] )
+    Wmunumass              = array( 'f', [ 0. ] )
+    WmunuPhi               = array( 'f', [ 0. ] )
     
-    ZeeRecoil = array( 'f', [ 0. ] )
-    ZeeMass = array( 'f', [ 0. ] )
-    ZeePhi = array( 'f', [ 0. ] )
+    ZeeRecoil              = array( 'f', [ 0. ] )
+    ZeeMass                = array( 'f', [ 0. ] )
+    ZeePhi                 = array( 'f', [ 0. ] )
 
-    ZmumuRecoil = array( 'f', [ 0. ] )
-    ZmumuMass = array( 'f', [ 0. ] )
-    ZmumuPhi = array( 'f', [ 0. ] )
+    ZmumuRecoil            = array( 'f', [ 0. ] )
+    ZmumuMass              = array( 'f', [ 0. ] )
+    ZmumuPhi               = array( 'f', [ 0. ] )
     
-    GammaRecoil = array('f',[0.])
-    GammaPhi = array( 'f', [ 0. ] )
+    GammaRecoil            = array('f',[0.])
+    GammaPhi               = array( 'f', [ 0. ] )
     
     outTree.Branch( 'st_runId', st_runId , 'st_runId/L')
     outTree.Branch( 'st_lumiSection', st_lumiSection , 'st_lumiSection/L')
@@ -300,7 +306,7 @@ def runbbdm(infile_):
     
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
-    
+    '''
     for df in read_root(filename, columns=jetvariables, chunksize=125000):
         
         for run,lumi,event,isData,mcWeight_,\
