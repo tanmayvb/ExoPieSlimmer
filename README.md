@@ -5,6 +5,7 @@ A set of py scripts to slim down the big tuples (output of ExoPieElement)
 
 git clone git@github.com:ExoPie/ExoPieSlimmer.git 
 
+git clone git@github.com:ExoPie/ExoPieUtils.git
 ## some details 
 
 variables.py: variables form input files are listed here
