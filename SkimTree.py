@@ -14,14 +14,14 @@ import time
 
 
 ################################################################################################################
-##---changes to be made: 
-##--------- 1. one trigger flag for one physics object or one CR 
-##--------- 2. write trigger list in another python file 
-##--------- 3. filter list in another python file 
-##--------- 4.  import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT. 
-##--------- 4.1 tried it, it is very difficult, its better to write own class p4. and use it for all kind of operation. in this one can implement, the functions 
-##---------      pt, eta, phi, mass, delta R, delta phi, + , -  (anything else we use?) 
-##--------- 5. rename jetvariables and move to a new file 
+##---changes to be made:
+##--------- 1. one trigger flag for one physics object or one CR
+##--------- 2. write trigger list in another python file
+##--------- 3. filter list in another python file
+##--------- 4.  import the class TLorentzVector.h from ROOT, so that p4 can be used without using ROOT.
+##--------- 4.1 tried it, it is very difficult, its better to write own class p4. and use it for all kind of operation. in this one can implement, the functions
+##---------      pt, eta, phi, mass, delta R, delta phi, + , -  (anything else we use?)
+##--------- 5. rename jetvariables and move to a new file
 ##--- 6. move https://github.com/ExoPie/ExoPieSlimmer/blob/master/SkimTree.py#L183-L273 into a function
 ##--- 7. add AK8 jet information
 ##-------- 8. update the variable names
@@ -34,10 +34,10 @@ import multiprocessing as mp
 
 
 
-## user packages 
-## in local dir 
+## user packages
+## in local dir
 import  triggers as trig
-import variables as branches 
+import variables as branches
 import filters as filters
 ## from commonutils
 sys.path.append('../ExoPieUtils/commonutils/')
@@ -48,14 +48,14 @@ import BooleanUtils as boolutil
 
 ## from analysisutils
 sys.path.append('../ExoPieUtils/analysisutils/')
-import analysis_utils as anautil 
+import analysis_utils as anautil
 
 ######################################################################################################
-## All import are done before this 
+## All import are done before this
 ######################################################################################################
 
 
-## ----- start if clock 
+## ----- start if clock
 
 start = time.clock()
 
@@ -63,7 +63,7 @@ start = time.clock()
 
 
 
-## ----- command line argument 
+## ----- command line argument
 usage = "analyzer for bb+DM (debugging) "
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile",  dest="inputfile")
@@ -87,27 +87,27 @@ debug_ = False
 def runbbdm(infile_):
     prefix="Skimmed_"
     outfilename= prefix+infile_.split("/")[-1]
-    
-    
+
+
     outputfilename = args.outputfile
     h_total = TH1F('h_total','h_total',2,0,2)
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
-    
+
     triglist = trig.trigger2016
     passfilename = open("outfilename.txt","w")
     passfilename.write(outfilename)
     passfilename.close()
-    
-    ## this will give some warning, but that is safe, 
+
+    ## this will give some warning, but that is safe,
     from  outputTree  import *
-    
+
     jetvariables = branches.allvars2017
-    
+
     filename = infile_
     ieve = 0;icount = 0
-    
+
     for df in read_root(filename, columns=jetvariables, chunksize=125000):
-        
+
         for run,lumi,event,isData,mcWeight_,\
                 pu_nTrueInt_,pu_nPUVert_,\
                 trigName_,trigResult_,filterName,filterResult,\
@@ -140,8 +140,8 @@ def runbbdm(infile_):
                            df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                            df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
                            df.FATjetSDmass, df.FATN2_Beta1_, df.FATN2_Beta2_, df.FATjetCHSPRmassL2L3Corr, df.FATjetCHSSDmassL2L3Corr               ):
-            
-            
+
+
             if ieve%1000==0: print "Processed",ieve,"Events"
             ieve = ieve + 1
             # -------------------------------------------------
@@ -158,43 +158,43 @@ def runbbdm(infile_):
             # -------------------------------------------------
             ## Trigger selection
             # -------------------------------------------------
-            
-            eletrigdecision=False 
-            mudecision=False 
-            metdecision=False 
-            phodecision=False 
-            
+
+            eletrigdecision=False
+            mudecision=False
+            metdecision=False
+            phodecision=False
+
             eletrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.Electrontrigger2017[itrig] ) ) for itrig in range(len(trig.Electrontrigger2017))]
             mutrigstatus  = [( anautil.CheckFilter(trigName_, trigResult_, trig.Muontrigger2017[itrig]     ) ) for itrig in range(len(trig.Muontrigger2017))    ]
             mettrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.METtrigger2017[itrig]       ) ) for itrig in range(len(trig.METtrigger2017))     ]
             photrigstatus = [( anautil.CheckFilter(trigName_, trigResult_, trig.Photontrigger2017[itrig]   ) ) for itrig in range(len(trig.Photontrigger2017))  ]
-            
+
             eletrigdecision = boolutil.logical_OR(eletrigstatus)
             mutrigdecision  = boolutil.logical_OR(mutrigstatus)
             mettrigdecision = boolutil.logical_OR(mettrigstatus)
             photrigdecision = boolutil.logical_OR(photrigstatus)
-            
+
             if not isData:
                 eletrigdecision = True
                 mutrigdecision = True
                 mettrigdecision = True
                 photrigdecision = True
-                
-        
+
+
             # ------------------------------------------------------
             ## Filter selection
             # ------------------------------------------------------
             filterdecision=False
             filterstatus = [False for ifilter in range(len(filters.filters2017)) ]
             filterstatus = [anautil.CheckFilter(filterName, filterResult, filters.filters2017[ifilter]) for ifilter in range(len(filters.filters2017)) ]
-            
-            
+
+
             if not isData:     filterdecision = True
             if isData:         filterdecision  = boolutil.logical_OR(filterstatus)
-            
+
             if filterdecision == False: continue
 
-            
+
 
             # ------------------------------------------------------
             ## PFMET Selection
@@ -208,15 +208,15 @@ def runbbdm(infile_):
             *         *      *  *      *
             *         *      *   ******
             '''
-            
-            
+
+
             phopt = [getPt(phopx_[ip], phopy_[ip]) for ip in range(npho_)]
             phoeta = [getEta(phopx_[ip], phopy_[ip], phopz_[ip]) for ip in range(npho_)]
-            
+
             pho_pt15_eta2p5_looseID = [ (phopt[ip] > 15.0) and (abs(phoeta[ip]) < 2.5) and (pholooseid_[ip])               for ip in range(npho_)]
             pass_pho_index = boolutil.WhereIsTrue(pho_pt15_eta2p5_looseID, 1)
-            
-                        
+
+
             '''
             ****   *      ****
             *      *      *
@@ -227,14 +227,14 @@ def runbbdm(infile_):
             elept = [getPt(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
             eleeta = [getEta(elepx_[ie], elepy_[ie], elepz_[ie]) for ie in range(nele_)]
             elephi = [getPhi(elepx_[ie], elepy_[ie]) for ie in range(nele_)]
-            
+
             ele_pt10_eta2p5_vetoID   = [(elept[ie] > 10.0) and (elevetoid_[ie])  and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_looseID  = [(elept[ie] > 10.0) and (elelooseid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_tightID  = [(elept[ie] > 30.0) and (eletightid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
-            
+
             pass_ele_veto_index      = boolutil.WhereIsTrue(ele_pt10_eta2p5_vetoID, 1)
-            
-            
+
+
             '''
             **     *  *     *
             * *  * *  *     *
@@ -245,10 +245,10 @@ def runbbdm(infile_):
             mupt = [getPt(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
             mueta = [getEta(mupx_[imu], mupy_[imu], mupz_[imu]) for imu in range(nmu_)]
             muphi = [getPhi(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
-            
+
             mu_pt10_eta2p4_looseID_looseISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mulooseid_[imu])  and (muisoloose[imu]) )  for imu in range(nmu_) ]
             mu_pt30_eta2p4_tightID_tightISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mutightid_[imu])  and (muisotight[imu]) )  for imu in range(nmu_) ]
-            
+
             pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO, 1)
 
 
@@ -264,18 +264,18 @@ def runbbdm(infile_):
             ak4phi = [getPhi(ak4px_[ij], ak4py_[ij]) for ij in range(nak4jet_)]
 
             ak4_pt30_eta4p5_IDT  = [ ( (ak4pt[ij] > 30.0) and (abs(ak4eta[ij]) < 4.5) and (ak4TightID_[ij] ) ) for ij in range(nak4jet_)]
-            
-            ##--- jet cleaning 
+
+            ##--- jet cleaning
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
             pass_jet_index_cleaned = []
-            
-            
+
+
             if len(ak4_pt30_eta4p5_IDT) > 0:
                 DRCut = 0.4
                 jetCleanAgainstEle = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_vetoID, ak4eta, eleeta, ak4phi, elephi, DRCut)
                 jetCleanAgainstMu  = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
-                
+
                 jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned, 3)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
@@ -289,30 +289,30 @@ def runbbdm(infile_):
             *              *      *          *
             *           ***       *****      *
 
-            
+
             '''
             fatjetpt = [getPt(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
             fatjeteta = [getEta(fatjetPx[ij], fatjetPy[ij], fatjetPz[ij]) for ij in range(fatnJet)]
             fatjetphi = [getPhi(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
-            
+
             fatjet_pt200_eta2p5_IDT  = [ ( (fatjetpt[ij] > 200.0) and (abs(fatjeteta[ij]) < 2.5) and (fatjetTightID[ij] ) ) for ij in range(fatnJet)]
-            
-            ##--- fat jet cleaning 
+
+            ##--- fat jet cleaning
             fatjetCleanAgainstEle = []
             fatjetCleanAgainstMu = []
             pass_fatjet_index_cleaned = []
-            
-            
+
+
             if len(fatjet_pt200_eta2p5_IDT) > 0:
                 fatjetCleanAgainstEle = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, ele_pt10_eta2p5_vetoID, fatjeteta, eleeta, fatjetphi, elephi, DRCut)
                 fatjetCleanAgainstMu  = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, mu_pt10_eta2p4_looseID_looseISO, fatjeteta, mueta, fatjetphi, muphi, DRCut)
-                
+
                 fatjetCleaned = boolutil.logical_AND_List2(fatjetCleanAgainstEle, fatjetCleanAgainstMu)
                 pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned, 3)
                 if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetpx)
-                
-            
-            
+
+
+
             '''
             ********    *        *       *
                *      *    *     *       *
@@ -337,9 +337,9 @@ def runbbdm(infile_):
                 tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
                 pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned,3)
                 if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
-                
-            
-                
+
+
+
             # -------------------------------------------------------------
             st_runId[0]             = long(run)
             st_lumiSection[0]       = lumi
@@ -368,6 +368,32 @@ def runbbdm(infile_):
             st_THINjetEleEF.clear()
             st_THINjetMuoEF.clear()
             st_THINjetCorrUnc.clear()
+
+
+
+            st_fjetPx.clear()
+            st_fjetPy.clear()
+            st_fjetPz.clear()
+            st_fjetEnergy.clear()
+            st_fjetTightID.clear()
+            st_fjetDoubleSV.clear()
+            st_fjetProbQCDb.clear()
+            st_fjetProbHbb.clear()
+            st_fjetProbQCDc.clear()
+            st_fjetProbHcc.clear()
+            st_fjetProbHbbc.clear()
+            st_fjetProbbbvsLight.clear()
+            st_fjetProbccvsLight.clear()
+            st_fjetProbTvsQCD.clear()
+            st_fjetProbWvsQCD.clear()
+            st_fjetProbZHbbvsQCD.clear()
+            st_fjetSDMass.clear()
+            st_fjetN2b1.clear()
+            st_fjetN2b2.clear()
+            st_fjetCHSPRMass.clear()
+            st_fjetCHSSDMass.clear()
+
+
 
             st_elePx.clear()
             st_elePy.clear()
@@ -414,6 +440,31 @@ def runbbdm(infile_):
                 st_THINjetMuoEF.push_back(ak4MuEF_[ithinjet])
                 st_THINjetCorrUnc.push_back(ak4JEC_[ithinjet])
             if debug_:print 'njets: ',len(pass_jet_index_cleaned)
+
+            st_nfjet[0] = len(pass_fatjet_index_cleaned)
+            for ifjet in pass_fatjet_index_cleaned:
+		st_fjetPx.push_back(fatjetPx[ifjet])
+                st_fjetPy.push_back(fatjetPy[ifjet])
+                st_fjetPz.push_back(fatjetPz[ifjet])
+                st_fjetEnergy.push_back(fatjetEnergy[ifjet])
+                st_fjetTightID.push_back(fatjetTightID[ifjet])
+                st_fjetDoubleSV.push_back(fatjet_DoubleSV[ifjet])
+                st_fjetProbQCDb.push_back(fatjet_probQCDb[ifjet])
+                st_fjetProbHbb.push_back(fatjet_probHbb[ifjet])
+                st_fjetProbQCDc.push_back(fatjet_probQCDc[ifjet])
+                st_fjetProbHcc.push_back(fatjet_probHcc[ifjet])
+                st_fjetProbHbbc.push_back(fatjet_probHbbc[ifjet])
+                st_fjetProbbbvsLight.push_back(fatjet_prob_bbvsLight[ifjet])
+                st_fjetProbccvsLight.push_back(fatjet_prob_ccvsLight[ifjet])
+                st_fjetProbTvsQCD.push_back(fatjet_prob_TvsQCD[ifjet])
+                st_fjetProbWvsQCD.push_back(fatjet_prob_WvsQCD[ifjet])
+                st_fjetProbZHbbvsQCD.push_back(fatjet_prob_ZHbbvsQCD[ifjet])
+                st_fjetSDMass.push_back(fatjetSDmass[ifjet])
+                st_fjetN2b1.push_back(fatN2_Beta1_[ifjet])
+                st_fjetN2b2.push_back(fatN2_Beta2_[ifjet])
+                st_fjetCHSPRMass.push_back(fatjetCHSPRmassL2L3Corr[ifjet])
+                st_fjetCHSSDMass.push_back(fatjetCHSSDmassL2L3Corr[ifjet])
+                #print ("fatN2_Beta1_",fatN2_Beta1_[ifjet],"fatN2_Beta2_",fatN2_Beta2_[ifjet])
 
             st_nEle[0] = len(pass_ele_veto_index)
             for iele in pass_ele_veto_index:
