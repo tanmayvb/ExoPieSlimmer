@@ -36,9 +36,11 @@ import multiprocessing as mp
 
 ## user packages
 ## in local dir
+sys.path.append('configs')
 import  triggers as trig
 import variables as branches
 import filters as filters
+
 ## from commonutils
 sys.path.append('../ExoPieUtils/commonutils/')
 import MathUtils as mathutil
@@ -83,18 +85,35 @@ infilename = "NCUGlobalTuples.root"
 
 debug_ = False
 
+def TextToList(textfile):
+    return([iline.rstrip()    for iline in open(textfile)])
 
-def runbbdm(infile_):
+## the input file list and key is caught in one variable as a python list, 
+#### first element is the list of rootfiles 
+#### second element is the key, user to name output.root
+
+def runbbdm(txtfile):
+    #print "inside runbbdm"
+    infile_  = TextToList(txtfile[0])
+    #print "inputs = ", infile_
+    #infile_ = inputs[0]
+    key_=txtfile[1]
+    
+    ''' old
     prefix="Skimmed_"
     outfilename= prefix+infile_.split("/")[-1]
+    '''
+    
+    prefix="Skimmed_"
+    outfilename= prefix+key_+".root"
+    
 
-
-    outputfilename = args.outputfile
+    #outputfilename = args.outputfile
     h_total = TH1F('h_total','h_total',2,0,2)
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
 
     triglist = trig.trigger2016
-    passfilename = open("outfilename.txt","w")
+    passfilename = open("configs/outfilename.txt","w")
     passfilename.write(outfilename)
     passfilename.close()
 
@@ -104,10 +123,11 @@ def runbbdm(infile_):
     jetvariables = branches.allvars2017
 
     filename = infile_
+    
     ieve = 0;icount = 0
-
-    for df in read_root(filename, columns=jetvariables, chunksize=125000):
-
+    #print "running on", filename
+    for df in read_root(filename, 'tree/treeMaker', columns=jetvariables, chunksize=125000):
+        
         for run,lumi,event,isData,mcWeight_,\
                 pu_nTrueInt_,pu_nPUVert_,\
                 trigName_,trigResult_,filterName,filterResult,\
@@ -629,28 +649,43 @@ def runbbdm(infile_):
 
             if pfmetstatus==False and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
             outTree.Fill()
-        outfile.cd()
-        h_total_mcweight.Write()
-        h_total.Write()
-        outfile.Write()
+    outfile.cd()
+    h_total_mcweight.Write()
+    h_total.Write()
+    outfile.Write()
 
     end = time.clock()
     print "%.4gs" % (end-start)
 
-#files=["/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_06082019/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190808_201541/0000/ExoPieElementTuples_232.root"]
-files=["/tmp/khurana/Merged_DYJets.root"]
+
+
+
+files=["/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_06082019/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190808_201541/0000/ExoPieElementTuples_232.root"]
+#files=["/tmp/khurana/Merged_DYJets.root"]
 
 if __name__ == '__main__':
-    runbbdm(files[0])
-    '''
-    try:
-        pool = mp.Pool(2)
-        pool.map(runbbdm, files)
-        pool.close()
-    except Exception as e:
-        print traceback.format_exc()
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
-        pass
-    '''
+    #runbbdm(files[0])
+    
+    inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/"
+
+    os.system('rm dirlist.txt')
+    os.system("ls -1 "+inputpath+" > dirlist.txt")
+    
+    allkeys=[idir.rstrip() for idir in open('dirlist.txt')]
+    alldirs=[inputpath+"/"+idir.rstrip() for idir in open('dirlist.txt')]
+    
+    pool = mp.Pool(10)
+    allsample=[]
+    for ikey in allkeys:
+        dirpath=inputpath+"/"+ikey
+        txtfile=ikey+".txt"
+        os.system ("find "+dirpath+"  -name \"*.root\" | grep -v \"failed\"  > "+txtfile)
+        fileList=TextToList(txtfile)
+        #os.system('rm '+txtfile)
+        #dic[ikey]=fileList
+        sample_  = [txtfile, ikey]
+        allsample.append(sample_)
+    print allsample
+    #pool.map(runbbdm, [[txtfile,ikey], [txtfile,ikey]])
+    pool.map(runbbdm, allsample)
+    ## this works fine but the output file name get same value becuase it is done via a text file at the moment, need to find a better way, 
