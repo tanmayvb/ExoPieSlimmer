@@ -12,13 +12,15 @@ from pandas import  DataFrame, concat
 from pandas import Series
 import time
 
+'''
 outfilenameis=(open('configs/outfilename.txt')).readline()
+
 print "outfilenameis = ",outfilenameis
 
 outfile = TFile(outfilenameis,'RECREATE')
 
 outTree = TTree( 'outTree', 'tree branches' )
-
+'''
 
 st_runId                  = numpy.zeros(1, dtype=int)
 st_lumiSection            = array( 'L', [ 0 ] )
@@ -143,7 +145,7 @@ ZmumuPhi               = array( 'f', [ 0. ] )
 
 GammaRecoil            = array('f',[0.])
 GammaPhi               = array( 'f', [ 0. ] )
-
+'''
 outTree.Branch( 'st_runId', st_runId , 'st_runId/L')
 outTree.Branch( 'st_lumiSection', st_lumiSection , 'st_lumiSection/L')
 outTree.Branch( 'st_eventId',  st_eventId, 'st_eventId/L')
@@ -261,3 +263,4 @@ outTree.Branch( 'ZmumuPhi', ZmumuPhi, 'ZmumuPhi/F')
 outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
 outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
 
+'''
