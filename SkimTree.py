@@ -800,7 +800,7 @@ if __name__ == '__main__':
         allkeys=[idir.rstrip() for idir in open('dirlist.txt')]
         alldirs=[inputpath+"/"+idir.rstrip() for idir in open('dirlist.txt')]
         
-        pool = mp.Pool(10)
+        pool = mp.Pool(6)
         allsample=[]
         for ikey in allkeys:
             dirpath=inputpath+"/"+ikey
