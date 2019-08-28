@@ -113,10 +113,12 @@ def runbbdm(txtfile):
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
 
     triglist = trig.trigger2016
-    passfilename = open("configs/outfilename.txt","w")
     
-    passfilename.write(outfilename)
-    passfilename.close()
+    #passfilename = open("configs/outfilename.txt","w")    
+    #passfilename.write(outfilename)
+    #passfilename.close()
+    #passfilename.write(outfilename)
+    #passfilename.close()
 
     ## this will give some warning, but that is safe,
     from  outputTree  import *
