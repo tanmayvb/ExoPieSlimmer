@@ -13,13 +13,13 @@ from pandas import Series
 import time
 
 
-## for parallel threads in interactive running 
+## for parallel threads in interactive running
 from multiprocessing import Process
 import multiprocessing as mp
 
 
 
-
+isCondor = False
 ## user packages
 ## in local dir
 sys.path.append('configs')
@@ -28,14 +28,16 @@ import variables as branches
 import filters as filters
 
 ## from commonutils
-sys.path.append('../ExoPieUtils/commonutils/')
+if isCondor:sys.path.append('ExoPieUtils/commonutils/')
+else:sys.path.append('../ExoPieUtils/commonutils/')
 import MathUtils as mathutil
 from MathUtils import *
 import BooleanUtils as boolutil
 
 
 ## from analysisutils
-sys.path.append('../ExoPieUtils/analysisutils/')
+if isCondor:sys.path.append('ExoPieUtils/analysisutils/')
+else:sys.path.append('../ExoPieUtils/analysisutils/')
 import analysis_utils as anautil
 
 ######################################################################################################
@@ -69,6 +71,11 @@ if args.farmout==None:
 else:
     isfarmout = args.farmout
 
+if isfarmout:
+    infile  = args.inputfile
+else: print "No file is provided for farmout"
+
+
 infilename = "NCUGlobalTuples.root"
 
 debug_ = False
@@ -78,43 +85,46 @@ debug_ = False
 def TextToList(textfile):
     return([iline.rstrip()    for iline in open(textfile)])
 
-## the input file list and key is caught in one variable as a python list, 
-#### first element is the list of rootfiles 
+## the input file list and key is caught in one variable as a python list,
+#### first element is the list of rootfiles
 #### second element is the key, user to name output.root
 
 def runbbdm(txtfile):
     infile_=[]
     outfilename=""
     prefix="Skimmed_"
-    
+
     if runInteractive:
         print "running for ", txtfile
         infile_  = TextToList(txtfile[0])
         key_=txtfile[1]
-    
+
         ''' old
         prefix="Skimmed_"
         outfilename= prefix+infile_.split("/")[-1]
         '''
-    
+
         outfilename= prefix+key_+".root"
-    
-        
-    if not runInteractive: 
-        infile_=txtfile
-        key_ = txtfile[0].split("/")[-5] ## after the crabConfig bug fix this will become -4 
-        outfilename=prefix+key_+".root"
-    
-    
-    
-    
+
+
+    if not runInteractive:
+        #infile_=txtfile
+        #key_ = txtfile[0].split("/")[-5] ## after the crabConfig bug fix this will become -4
+        #outfilename=prefix+key_+".root"
+        infile_=TextToList(txtfile)
+        print "running code for ",infile_
+        outfilename = "SkimmedTree.root"
+
+
+
+
     #outputfilename = args.outputfile
     h_total = TH1F('h_total','h_total',2,0,2)
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
 
     triglist = trig.trigger2016
-    
-    #passfilename = open("configs/outfilename.txt","w")    
+
+    #passfilename = open("configs/outfilename.txt","w")
     #passfilename.write(outfilename)
     #passfilename.close()
     #passfilename.write(outfilename)
@@ -122,12 +132,12 @@ def runbbdm(txtfile):
 
     ## this will give some warning, but that is safe,
     from  outputTree  import *
-    
-    ## following can be moved to outputtree.py if we manage to change the name of output root file. 
+
+    ## following can be moved to outputtree.py if we manage to change the name of output root file.
     outfilenameis = outfilename
-    outfile = TFile(outfilenameis,'RECREATE')
+    #outfile = TFile(outfilenameis,'RECREATE')
     outTree = TTree( 'outTree', 'tree branches' )
-    
+
     outTree.Branch( 'st_runId', st_runId , 'st_runId/L')
     outTree.Branch( 'st_lumiSection', st_lumiSection , 'st_lumiSection/L')
     outTree.Branch( 'st_eventId',  st_eventId, 'st_eventId/L')
@@ -138,8 +148,8 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_pfMetUncJetEnUp', st_pfMetUncJetEnUp )
     outTree.Branch( 'st_pfMetUncJetEnDown', st_pfMetUncJetEnDown)
     outTree.Branch( 'st_isData', st_isData , 'st_isData/O')
-    
-    
+
+
     outTree.Branch( 'st_THINnJet',st_THINnJet, 'st_THINnJet/L' )
     outTree.Branch( 'st_THINjetPx', st_THINjetPx  )
     outTree.Branch( 'st_THINjetPy' , st_THINjetPy )
@@ -149,14 +159,14 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_THINjetHadronFlavor',st_THINjetHadronFlavor )
     outTree.Branch( 'st_THINjetNHadEF',st_THINjetNHadEF )
     outTree.Branch( 'st_THINjetCHadEF',st_THINjetCHadEF )
-    
+
     outTree.Branch( 'st_THINjetCEmEF',st_THINjetCEmEF )
     outTree.Branch( 'st_THINjetPhoEF',st_THINjetPhoEF )
     outTree.Branch( 'st_THINjetEleEF',st_THINjetEleEF )
     outTree.Branch( 'st_THINjetMuoEF',st_THINjetMuoEF )
     outTree.Branch('st_THINjetCorrUnc', st_THINjetCorrUnc)
-    
-    
+
+
     outTree.Branch( 'st_nfjet',st_nfjet,'st_nfjet/L')
     outTree.Branch( 'st_fjetPx',st_fjetPx)
     outTree.Branch( 'st_fjetPy',st_fjetPy)
@@ -178,7 +188,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_fjetN2b2',st_fjetN2b2)
     outTree.Branch( 'st_fjetCHSPRMass',st_fjetCHSPRMass)
     outTree.Branch( 'st_fjetCHSSDMass',st_fjetCHSSDMass)
-    
+
 
 
     outTree.Branch( 'st_nEle',st_nEle , 'st_nEle/L')
@@ -188,7 +198,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_eleEnergy', st_eleEnergy )
     outTree.Branch( 'st_eleIsPassTight', st_eleIsPassTight)#, 'st_eleIsPassTight/O' )
     outTree.Branch( 'st_eleIsPassLoose', st_eleIsPassLoose)#, 'st_eleIsPassLoose/O' )
-    
+
     outTree.Branch( 'st_nPho',st_nPho , 'st_nPho/L')
     outTree.Branch( 'st_phoIsPassTight', st_phoIsPassTight)#, 'st_phoIsPassTight/O' )
     outTree.Branch( 'st_phoPx', st_phoPx  )
@@ -204,13 +214,13 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_muEnergy', st_muEnergy)
     outTree.Branch( 'st_isTightMuon', st_isTightMuon)#, 'st_isTightMuon/O' )
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
-    
+
     outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
     outTree.Branch( 'st_nTauTightElectron', st_nTauTightElectron, 'st_nTauTightElectron/L')
     outTree.Branch( 'st_nTauTightMuon', st_nTauTightMuon, 'st_nTauTightMuon/L')
     outTree.Branch( 'st_nTauTightEleMu', st_nTauTightEleMu, 'st_nTauTightEleMu/L')
     outTree.Branch( 'st_nTauLooseEleMu', st_nTauLooseEleMu, 'st_nTauLooseEleMu/L')
-    
+
     outTree.Branch( 'st_pu_nTrueInt', st_pu_nTrueInt, 'st_pu_nTrueInt/F')
     outTree.Branch( 'st_pu_nPUVert', st_pu_nPUVert, 'st_pu_nPUVert/F')
     outTree.Branch( 'st_THINjetNPV', st_THINjetNPV, 'st_THINjetNPV/F')
@@ -223,37 +233,37 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_genParPy' , st_genParPy )
     outTree.Branch( 'st_genParPz', st_genParPz )
     outTree.Branch( 'st_genParEnergy', st_genParEnergy )
-    
+
     outTree.Branch( 'WenuRecoil', WenuRecoil, 'WenuRecoil/F')
     outTree.Branch( 'Wenumass', Wenumass, 'Wenumass/F')
     outTree.Branch( 'WenuPhi', WenuPhi, 'WenuPhi/F')
-    
+
     outTree.Branch( 'WmunuRecoil', WmunuRecoil, 'WmunuRecoil/F')
     outTree.Branch( 'Wmunumass', Wmunumass, 'Wmunumass/F')
     outTree.Branch( 'WmunuPhi', WmunuPhi, 'WmunuPhi/F')
-    
+
     outTree.Branch( 'ZeeRecoil', ZeeRecoil, 'ZeeRecoil/F')
     outTree.Branch( 'ZeeMass', ZeeMass, 'ZeeMass/F')
     outTree.Branch( 'ZeePhi', ZeePhi, 'ZeePhi/F')
-    
+
     outTree.Branch( 'ZmumuRecoil', ZmumuRecoil, 'ZmumuRecoil/F')
     outTree.Branch( 'ZmumuMass', ZmumuMass, 'ZmumuMass/F')
     outTree.Branch( 'ZmumuPhi', ZmumuPhi, 'ZmumuPhi/F')
-    
+
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
-    
-    ## following can be moved to outputtree.py if we manage to change the name of output root file. 
 
-    
+    ## following can be moved to outputtree.py if we manage to change the name of output root file.
+
+
     jetvariables = branches.allvars2017
 
     filename = infile_
-    
+
     ieve = 0;icount = 0
     #print "running on", filename
     for df in read_root(filename, 'tree/treeMaker', columns=jetvariables, chunksize=125000):
-        
+
         for run,lumi,event,isData,mcWeight_,\
                 pu_nTrueInt_,pu_nPUVert_,\
                 trigName_,trigResult_,filterName,filterResult,\
@@ -286,8 +296,8 @@ def runbbdm(txtfile):
                            df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                            df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
                            df.FATjetSDmass, df.FATN2_Beta1_, df.FATN2_Beta2_, df.FATjetCHSPRmassL2L3Corr, df.FATjetCHSSDmassL2L3Corr               ):
-            
-            
+
+
             if debug_: print len(trigName_),len(trigResult_),len(filterName),len(filterResult),len(metUnc_), len(elepx_), len(elepy_), len(elepz_), len(elee_), len(elevetoid_), len(elelooseid_), len(eletightid_), len(eleCharge_), npho_,len(phopx_), len(phopy_), len(phopz_), len(phoe_), len(pholooseid_), len(photightID_), nmu_, len(mupx_), len(mupy_), len(mupz_), len(mue_), len(mulooseid_), len(mutightid_), len(muisoloose), len(muisomedium), len(muisotight), len(muisovtight), len(muCharge_), nTau_, len(tau_px_), len(tau_py_), len(tau_pz_), len(tau_e_), len(tau_dm_), len(tau_isLoose_), len(genParId_), len(genMomParId_), len(genParSt_), len(genpx_), len(genpy_), len(genpz_), len(gene_), len(ak4px_), len(ak4py_), len(ak4pz_), len(ak4e_), len(ak4TightID_), len(ak4deepcsv_), len(ak4flavor_), len(ak4NHEF_), len(ak4CHEF_), len(ak4CEmEF_), len(ak4PhEF_), len(ak4EleEF_), len(ak4MuEF_), len(ak4JEC_), len(fatjetPx), len(fatjetPy), len(fatjetPz), len(fatjetEnergy), len(fatjetTightID), len(fatjet_DoubleSV), len(fatjet_probQCDb), len(fatjet_probHbb), len(fatjet_probQCDc), len(fatjet_probHcc), len(fatjet_probHbbc), len(fatjet_prob_bbvsLight), len(fatjet_prob_ccvsLight), len(fatjet_prob_TvsQCD), len(fatjet_prob_WvsQCD), len(fatjet_prob_ZHbbvsQCD), len(fatjetSDmass), len(fatN2_Beta1_), len(fatN2_Beta2_), len(fatjetCHSPRmassL2L3Corr), len(fatjetCHSSDmassL2L3Corr)
 
             if ieve%1000==0: print "Processed",ieve,"Events"
@@ -775,6 +785,7 @@ def runbbdm(txtfile):
 
             if pfmetstatus==False and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
             outTree.Fill()
+    outfile = TFile(outfilenameis,'RECREATE')        
     outfile.cd()
     h_total_mcweight.Write()
     h_total.Write()
@@ -789,19 +800,20 @@ def runbbdm(txtfile):
 files=["/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190825_203128/0000/ExoPieElementTuples_1.root", "/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190825_203128/0000/ExoPieElementTuples_2.root"]
 
 if __name__ == '__main__':
-    if not runInteractive: 
-        runbbdm(files)
-    
+    if not runInteractive:
+        txtFile=infile
+        runbbdm(txtFile)
+
     if runInteractive:
         ''' following part is for interactive running. This is still under testing because output file name can't be changed at this moment '''
         inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/"
 
         os.system('rm dirlist.txt')
         os.system("ls -1 "+inputpath+" > dirlist.txt")
-        
+
         allkeys=[idir.rstrip() for idir in open('dirlist.txt')]
         alldirs=[inputpath+"/"+idir.rstrip() for idir in open('dirlist.txt')]
-        
+
         pool = mp.Pool(6)
         allsample=[]
         for ikey in allkeys:
@@ -809,11 +821,10 @@ if __name__ == '__main__':
             txtfile=ikey+".txt"
             os.system ("find "+dirpath+"  -name \"*.root\" | grep -v \"failed\"  > "+txtfile)
             fileList=TextToList(txtfile)
-            ## this is the list, first element is txt file with all the files and second element is the ikey (kind of sample name identifier) 
+            ## this is the list, first element is txt file with all the files and second element is the ikey (kind of sample name identifier)
             sample_  = [txtfile, ikey]
-            ## push information about one sample into global list. 
+            ## push information about one sample into global list.
             allsample.append(sample_)
         print allsample
-        pool.map(runbbdm, allsample) 
-        ## this works fine but the output file name get same value becuase it is done via a text file at the moment, need to find a better way, 
-    
+        pool.map(runbbdm, allsample)
+        ## this works fine but the output file name get same value becuase it is done via a text file at the moment, need to find a better way,
