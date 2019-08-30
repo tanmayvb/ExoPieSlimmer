@@ -6,6 +6,17 @@ A set of py scripts to slim down the big tuples (output of ExoPieElement)
 git clone git@github.com:ExoPie/ExoPieSlimmer.git 
 
 git clone git@github.com:ExoPie/ExoPieUtils.git
+
+## What changes to make: 
+
+In order to run the skimmer, you have to change the input file path and also setinterative to True. 
+
+isCondor = False
+
+runInteractive = True
+
+inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/" 
+
 ## some details 
 
 variables.py: variables form input files are listed here
