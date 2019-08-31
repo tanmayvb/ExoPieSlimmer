@@ -1,3 +1,5 @@
+## This branch at this moment is compatible with only 2017 Framework. 
+
 # ExoPieSlimmer
 A set of py scripts to slim down the big tuples (output of ExoPieElement) 
 
