@@ -19,6 +19,12 @@ runInteractive = True
 
 inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/" 
 
+
+## How to run the skimmer 
+
+python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -runOnTXT -D outputDirectory_name
+
+
 ## some details 
 
 variables.py: variables form input files are listed here
