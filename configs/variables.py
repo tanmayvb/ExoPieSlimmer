@@ -58,6 +58,7 @@ allvars2017=['runId',
              'HPSTau_Energy',
              'disc_decayModeFinding',
              'disc_againstElectronLooseMVA6',
+             'disc_againstElectronMediumMVA6'
              'disc_againstElectronTightMVA6',
              'disc_againstMuonLoose3',
              'disc_againstMuonTight3',

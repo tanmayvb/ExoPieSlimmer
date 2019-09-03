@@ -136,7 +136,7 @@ def runbbdm(txtfile):
         #print "running code for ",infile_
         prefix_ = '' #'/eos/cms/store/group/phys_exotica/bbMET/2017_skimmedFiles/locallygenerated/'
         if outputdir!='.': prefix_ = outputdir+'/'
-        print "prefix_", prefix_
+        #print "prefix_", prefix_
         outfilename = prefix_+txtfile.split('/')[-1].replace('.txt','.root')#"SkimmedTree.root"
         print 'outfilename',  outfilename 
     
@@ -238,10 +238,15 @@ def runbbdm(txtfile):
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
     
     outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
-    outTree.Branch( 'st_nTauTightElectron', st_nTauTightElectron, 'st_nTauTightElectron/L')
-    outTree.Branch( 'st_nTauTightMuon', st_nTauTightMuon, 'st_nTauTightMuon/L')
-    outTree.Branch( 'st_nTauTightEleMu', st_nTauTightEleMu, 'st_nTauTightEleMu/L')
-    outTree.Branch( 'st_nTauLooseEleMu', st_nTauLooseEleMu, 'st_nTauLooseEleMu/L')
+    outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon, 'st_Taudisc_againstLooseMuon/L')
+    outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon, 'st_Taudisc_againstTightMuon/L')
+    outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron, 'st_Taudisc_againstLooseElectron/L')
+    outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron, 'st_Taudisc_againstMediumElectron/L')
+
+    outTree.Branch( 'st_tau_isoLoose', st_tau_isoLoose, 'st_tau_isoLoose/L')
+    outTree.Branch( 'st_tau_isoMedium', st_tau_isoMedium, 'st_tau_isoMedium/L')
+    outTree.Branch( 'st_tau_isoTight', st_tau_isoTight, 'st_tau_isoTight/L')
+
     
     outTree.Branch( 'st_pu_nTrueInt', st_pu_nTrueInt, 'st_pu_nTrueInt/F')
     outTree.Branch( 'st_pu_nPUVert', st_pu_nPUVert, 'st_pu_nPUVert/F')
@@ -274,6 +279,13 @@ def runbbdm(txtfile):
     
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
+
+
+    # trigger status branches
+    outTree.Branch( 'st_eletrigdecision', st_eletrigdecision , 'st_eletrigdecision/O')
+    outTree.Branch( 'st_mutrigdecision', st_mutrigdecision , 'st_mutrigdecision/O')
+    outTree.Branch( 'st_mettrigdecision', st_mettrigdecision , 'st_mettrigdecision/O')
+    outTree.Branch( 'st_photrigdecision', st_photrigdecision , 'st_photrigdecision/O')
     
     ## following can be moved to outputtree.py if we manage to change the name of output root file. 
 
@@ -293,7 +305,8 @@ def runbbdm(txtfile):
                 nele_,elepx_,elepy_,elepz_,elee_,elevetoid_, elelooseid_,eletightid_,\
                 eleCharge_, npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
                 nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
-                nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,\
+                nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,tau_isoMedium_,tau_isoTight_,\
+                Taudisc_againstLooseMuon,Taudisc_againstTightMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,\
                 nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
                 nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
                 ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
@@ -309,7 +322,8 @@ def runbbdm(txtfile):
                            df.nEle,df.elePx,df.elePy,df.elePz,df.eleEnergy,df.eleIsPassVeto, df.eleIsPassLoose,df.eleIsPassTight,\
                            df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,\
                            df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.PFIsoLoose, df.PFIsoMedium, df.PFIsoTight, df.PFIsoVeryTight, df.muCharge,\
-                           df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,\
+                           df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byMediumIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byTightIsolationMVArun2017v2DBoldDMwLT2017,\
+                           df.disc_againstMuonLoose3,df.disc_againstMuonTight3,df.disc_againstElectronLooseMVA6,df.disc_againstElectronMediumMVA6,\
                            df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
                            df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
                            df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
@@ -525,6 +539,11 @@ def runbbdm(txtfile):
             st_lumiSection[0]       = lumi
             st_eventId[0]           = event
             st_isData[0]            = isData
+            st_eletrigdecision[0]   = eletrigdecision
+            st_mutrigdecision[0]    = mutrigdecision
+            st_mettrigdecision[0]   = mettrigdecision
+            st_photrigdecision[0]   = photrigdecision
+
             st_pfMetCorrPt[0]       = met_
             st_pfMetCorrPhi[0]      = metphi_
 
@@ -587,6 +606,7 @@ def runbbdm(txtfile):
             st_muEnergy.clear()
             st_isTightMuon.clear()
             #st_muIso.clear()
+
 
             st_phoPx.clear()
             st_phoPy.clear()
@@ -664,6 +684,14 @@ def runbbdm(txtfile):
             if debug_:print 'nMu: ',len(pass_mu_index)
 
             st_HPSTau_n[0] = len(pass_tau_index_cleaned)
+            for itau in range(len(pass_tau_index_cleaned)):
+		st_Taudisc_againstLooseMuon      = Taudisc_againstLooseMuon[itau]
+		st_Taudisc_againstTightMuon     = Taudisc_againstTightMuon[itau]
+                st_Taudisc_againstLooseElectron  = Taudisc_againstLooseElectron[itau]
+                st_Taudisc_againstMediumElectron = Taudisc_againstMediumElectron[itau] 
+                st_tau_isoLoose       = tau_isLoose_[itau]
+                st_tau_isoMedium      = tau_isoMedium_[itau]
+		st_tau_isoTight       = tau_isoTight_[itau]
             # st_nTauTightElectron[0] = len(myTausTightElectron)
             # st_nTauTightMuon[0] = len(myTausTightMuon)
             # st_nTauTightEleMu[0] = len(myTausTightEleMu)
@@ -805,7 +833,7 @@ def runbbdm(txtfile):
             GammaRecoilStatus = (GammaRecoil[0] > 170)
             if debug_: print 'Reached Gamma CR'
 
-            if pfmetstatus==False and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
+            if pfmetstatus==False:continue #and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
             outTree.Fill()
 
     #outfile = TFile(outfilenameis,'RECREATE')
@@ -835,7 +863,10 @@ if __name__ == '__main__':
 	files     = glob.glob(filesPath)
         n = 8 #submit n txt files at a time, make equal to cores
         final = [files[i * n:(i + 1) * n] for i in range((len(files) + n - 1) // n )]
+        print 'final', final
         for i in range(len(final)):
+            print 'first set', final[i]
+            
             try:
                 pool = mp.Pool(8)
                 pool.map(runbbdm,final[i])
@@ -845,7 +876,7 @@ if __name__ == '__main__':
 		print e
 		print "Corrupt file inside input txt file is detected! Skipping this txt file:  ", final[i]
 		continue
-    
+            
     if runInteractive and not runOnTxt:
         ''' following part is for interactive running. This is still under testing because output file name can't be changed at this moment '''
         inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/"
