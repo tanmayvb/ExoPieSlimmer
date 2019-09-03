@@ -22,8 +22,12 @@ inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017m
 
 ## How to run the skimmer 
 
+#### Intractive 1: 
+if you want to run skimmer on txt files of datasets, then use this command:
+
 python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -runOnTXT -D outputDirectory_name
 
+but you need to keep `isCondor=Flase` and `runInteractive=True`
 
 ## some details 
 
