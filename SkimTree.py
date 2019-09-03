@@ -239,7 +239,7 @@ def runbbdm(txtfile):
     
     outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
     outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon, 'st_Taudisc_againstLooseMuon/L')
-    outTree.Branch( 'st_Taudisc_againstMediumMuon', st_Taudisc_againstMediumMuon, 'st_Taudisc_againstMediumMuon/L')
+    outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon, 'st_Taudisc_againstTightMuon/L')
     outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron, 'st_Taudisc_againstLooseElectron/L')
     outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron, 'st_Taudisc_againstMediumElectron/L')
 
@@ -306,7 +306,7 @@ def runbbdm(txtfile):
                 eleCharge_, npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
                 nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
                 nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,tau_isoMedium_,tau_isoTight_,\
-                Taudisc_againstLooseMuon,Taudisc_againstMediumMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,\
+                Taudisc_againstLooseMuon,Taudisc_againstTightMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,\
                 nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
                 nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
                 ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
@@ -686,7 +686,7 @@ def runbbdm(txtfile):
             st_HPSTau_n[0] = len(pass_tau_index_cleaned)
             for itau in range(len(pass_tau_index_cleaned)):
 		st_Taudisc_againstLooseMuon      = Taudisc_againstLooseMuon[itau]
-		st_Taudisc_againstMediumMuon     = Taudisc_againstMediumMuon[itau]
+		st_Taudisc_againstTightMuon     = Taudisc_againstTightMuon[itau]
                 st_Taudisc_againstLooseElectron  = Taudisc_againstLooseElectron[itau]
                 st_Taudisc_againstMediumElectron = Taudisc_againstMediumElectron[itau] 
                 st_tau_isoLoose       = tau_isLoose_[itau]
