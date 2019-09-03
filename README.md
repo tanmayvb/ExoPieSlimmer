@@ -24,10 +24,35 @@ inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017m
 
 #### Intractive 1: 
 if you want to run skimmer on txt files of datasets, then use this command:
-
+```
 python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -runOnTXT -D outputDirectory_name
+```
+but you need to keep `isCondor=False` and `runInteractive=True`
 
-but you need to keep `isCondor=Flase` and `runInteractive=True`
+#### Intractive 2:
+if you want to run skimmer on eos path then use this command:
+python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -D outputDirectory_name
+
+Note: this command is not fully tested so please don't use for now. We need to make few changes.
+
+#### Submitting Condor Job,
+
+To submit condor jobs, please follow these steps:
+```
+git clone git@github.com:ExoPie/ExoPieSlimmer.git
+git clone git@github.com:ExoPie/ExoPieUtils.git
+cd ExoPieSlimmer
+git clone https://github.com/deepakcern/CondorJobs.git
+cd CondorJobs
+. submitjobs.sh
+```
+Before running this command please make few changes:
+keep `isCondor=True` and `runInteractive=False`
+
+replace this `infile_  = TextToList(txtfile[0])` with `infile_  = TextToList(txtfile)` , comment this `key_=txtfile[1]` and replace this `outfilename= prefix+key_+".root"` with `SkimmedTree.root`
+
+Filelists are already there, so you need to replace them with your Filelists
+
 
 ## some details 
 
