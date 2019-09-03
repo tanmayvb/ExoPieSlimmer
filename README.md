@@ -31,8 +31,9 @@ but you need to keep `isCondor=False` and `runInteractive=True`
 
 #### Intractive 2:
 if you want to run skimmer on eos path then use this command:
+```
 python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -D outputDirectory_name
-
+```
 Note: this command is not fully tested so please don't use for now. We need to make few changes.
 
 #### Submitting Condor Job,
