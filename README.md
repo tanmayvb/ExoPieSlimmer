@@ -36,6 +36,9 @@ python SkimTree.py -F -inDir inputdirectory_name_where_txt_files_are_located -D 
 ```
 Note: this command is not fully tested so please don't use for now. We need to make few changes.
 
+In case you want to use this command, you need to do following things:
+1. Inside the function runbbdm(), you need to this condition `if runInteractive:` into two conditions ` if runInteractive and not runOnTxt:` and ` if runInteractive and runOnTxt: ` for the outfilename . 
+
 #### Submitting Condor Job,
 
 To submit condor jobs, please follow these steps:
