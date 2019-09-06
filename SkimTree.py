@@ -18,7 +18,7 @@ from multiprocessing import Process
 import multiprocessing as mp
 
 
-isCondor = False
+isCondor = True
 
 ## user packages
 ## in local dir
@@ -45,7 +45,7 @@ import analysis_utils as anautil
 ######################################################################################################
 
 
-runInteractive = True
+runInteractive = False
 
 ## ----- start if clock
 
@@ -115,16 +115,17 @@ def runbbdm(txtfile):
     
     if not runInteractive:
         print "running for ", txtfile
-        infile_  = TextToList(txtfile[0])
-        key_=txtfile[1]
+        infile_  = TextToList(txtfile)
+        outfile = txtfile.split('/')[-1].replace('.txt','.root')
+        #key_=txtfile[1]
     
         ''' old
         prefix="Skimmed_"
         outfilename= prefix+infile_.split("/")[-1]
         '''
     
-        outfilename= prefix+key_+".root"
-    
+        outfilename= outfile#prefix+key_+".root"
+        print "outfilename", outfilename 
         
     if runInteractive: 
         #infile_=txtfile
@@ -238,14 +239,16 @@ def runbbdm(txtfile):
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
     
     outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
-    outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon, 'st_Taudisc_againstLooseMuon/L')
-    outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon, 'st_Taudisc_againstTightMuon/L')
-    outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron, 'st_Taudisc_againstLooseElectron/L')
-    outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron, 'st_Taudisc_againstMediumElectron/L')
+    outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon)
+    outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon)
+    outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron)
+    outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron)
 
-    outTree.Branch( 'st_tau_isoLoose', st_tau_isoLoose, 'st_tau_isoLoose/L')
-    outTree.Branch( 'st_tau_isoMedium', st_tau_isoMedium, 'st_tau_isoMedium/L')
-    outTree.Branch( 'st_tau_isoTight', st_tau_isoTight, 'st_tau_isoTight/L')
+    outTree.Branch( 'st_tau_isoLoose', st_tau_isoLoose)
+    outTree.Branch( 'st_tau_isoMedium', st_tau_isoMedium)
+    outTree.Branch( 'st_tau_isoTight', st_tau_isoTight)
+    outTree.Branch('st_tau_dm',st_tau_dm)
+    
 
     
     outTree.Branch( 'st_pu_nTrueInt', st_pu_nTrueInt, 'st_pu_nTrueInt/F')
@@ -336,7 +339,7 @@ def runbbdm(txtfile):
             
             if debug_: print len(trigName_),len(trigResult_),len(filterName),len(filterResult),len(metUnc_), len(elepx_), len(elepy_), len(elepz_), len(elee_), len(elevetoid_), len(elelooseid_), len(eletightid_), len(eleCharge_), npho_,len(phopx_), len(phopy_), len(phopz_), len(phoe_), len(pholooseid_), len(photightID_), nmu_, len(mupx_), len(mupy_), len(mupz_), len(mue_), len(mulooseid_), len(mutightid_), len(muisoloose), len(muisomedium), len(muisotight), len(muisovtight), len(muCharge_), nTau_, len(tau_px_), len(tau_py_), len(tau_pz_), len(tau_e_), len(tau_dm_), len(tau_isLoose_), len(genParId_), len(genMomParId_), len(genParSt_), len(genpx_), len(genpy_), len(genpz_), len(gene_), len(ak4px_), len(ak4py_), len(ak4pz_), len(ak4e_), len(ak4TightID_), len(ak4deepcsv_), len(ak4flavor_), len(ak4NHEF_), len(ak4CHEF_), len(ak4CEmEF_), len(ak4PhEF_), len(ak4EleEF_), len(ak4MuEF_), len(ak4JEC_), len(fatjetPx), len(fatjetPy), len(fatjetPz), len(fatjetEnergy), len(fatjetTightID), len(fatjet_DoubleSV), len(fatjet_probQCDb), len(fatjet_probHbb), len(fatjet_probQCDc), len(fatjet_probHcc), len(fatjet_probHbbc), len(fatjet_prob_bbvsLight), len(fatjet_prob_ccvsLight), len(fatjet_prob_TvsQCD), len(fatjet_prob_WvsQCD), len(fatjet_prob_ZHbbvsQCD), len(fatjetSDmass), len(fatN2_Beta1_), len(fatN2_Beta2_), len(fatjetCHSPRmassL2L3Corr), len(fatjetCHSSDmassL2L3Corr)
 
-            #if ieve%1000==0: print "Processed",ieve,"Events"
+            if ieve%1000==0: print "Processed",ieve,"Events"
             ieve = ieve + 1
             # -------------------------------------------------
             # MC Weights
@@ -408,7 +411,7 @@ def runbbdm(txtfile):
             phoeta = [getEta(phopx_[ip], phopy_[ip], phopz_[ip]) for ip in range(npho_)]
 
             pho_pt15_eta2p5_looseID = [ (phopt[ip] > 15.0) and (abs(phoeta[ip]) < 2.5) and (pholooseid_[ip])               for ip in range(npho_)]
-            pass_pho_index = boolutil.WhereIsTrue(pho_pt15_eta2p5_looseID, 1)
+            pass_pho_index = boolutil.WhereIsTrue(pho_pt15_eta2p5_looseID)
 
 
             '''
@@ -426,7 +429,7 @@ def runbbdm(txtfile):
             ele_pt10_eta2p5_looseID  = [(elept[ie] > 10.0) and (elelooseid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
             ele_pt10_eta2p5_tightID  = [(elept[ie] > 30.0) and (eletightid_[ie]) and (((abs(eleeta[ie]) > 1.566 or abs(eleeta[ie]) < 1.4442) and (abs(eleeta[ie]) < 2.5))) for ie in range(nele_)]
 
-            pass_ele_veto_index      = boolutil.WhereIsTrue(ele_pt10_eta2p5_vetoID, 1)
+            pass_ele_veto_index      = boolutil.WhereIsTrue(ele_pt10_eta2p5_vetoID)
 
 
             '''
@@ -443,7 +446,7 @@ def runbbdm(txtfile):
             mu_pt10_eta2p4_looseID_looseISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mulooseid_[imu])  and (muisoloose[imu]) )  for imu in range(nmu_) ]
             mu_pt30_eta2p4_tightID_tightISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mutightid_[imu])  and (muisotight[imu]) )  for imu in range(nmu_) ]
 
-            pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO, 1)
+            pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO)
 
 
             '''
@@ -469,9 +472,8 @@ def runbbdm(txtfile):
                 DRCut = 0.4
                 jetCleanAgainstEle = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_vetoID, ak4eta, eleeta, ak4phi, elephi, DRCut)
                 jetCleanAgainstMu  = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
-
                 jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
-                pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned, 3)
+                pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
 
 
@@ -500,10 +502,9 @@ def runbbdm(txtfile):
             if len(fatjet_pt200_eta2p5_IDT) > 0:
                 fatjetCleanAgainstEle = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, ele_pt10_eta2p5_vetoID, fatjeteta, eleeta, fatjetphi, elephi, DRCut)
                 fatjetCleanAgainstMu  = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, mu_pt10_eta2p4_looseID_looseISO, fatjeteta, mueta, fatjetphi, muphi, DRCut)
-
                 fatjetCleaned = boolutil.logical_AND_List2(fatjetCleanAgainstEle, fatjetCleanAgainstMu)
-                pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned, 3)
-                if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetPx)
+                pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned)
+                if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetpx)
 
 
 
@@ -520,6 +521,7 @@ def runbbdm(txtfile):
             tauphi = [getPhi(tau_px_[itau], tau_py_[itau]) for itau in range(nTau_)]
 
             tau_eta2p3_iDLdm_pt18 = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) ) for itau in range(nTau_)]
+
             if debug_:print "tau_eta2p3_iDLdm_pt18 = ", tau_eta2p3_iDLdm_pt18
 
             tauCleanAgainstEle = []
@@ -529,9 +531,8 @@ def runbbdm(txtfile):
                 tauCleanAgainstEle = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
                 tauCleanAgainstMu  = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
                 tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
-                pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned,3)
+                pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned)
                 if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
-
 
 
             # -------------------------------------------------------------
@@ -591,6 +592,15 @@ def runbbdm(txtfile):
             st_fjetCHSPRMass.clear()
             st_fjetCHSSDMass.clear()
 
+
+            st_Taudisc_againstLooseMuon.clear()
+            st_Taudisc_againstTightMuon.clear()
+            st_Taudisc_againstLooseElectron.clear()
+            st_Taudisc_againstMediumElectron.clear()
+            st_tau_isoLoose.clear()
+            st_tau_isoMedium.clear()
+            st_tau_isoTight.clear()
+            st_tau_dm.clear()
 
 
             st_elePx.clear()
@@ -684,14 +694,15 @@ def runbbdm(txtfile):
             if debug_:print 'nMu: ',len(pass_mu_index)
 
             st_HPSTau_n[0] = len(pass_tau_index_cleaned)
-            for itau in range(len(pass_tau_index_cleaned)):
-		st_Taudisc_againstLooseMuon      = Taudisc_againstLooseMuon[itau]
-		st_Taudisc_againstTightMuon     = Taudisc_againstTightMuon[itau]
-                st_Taudisc_againstLooseElectron  = Taudisc_againstLooseElectron[itau]
-                st_Taudisc_againstMediumElectron = Taudisc_againstMediumElectron[itau] 
-                st_tau_isoLoose       = tau_isLoose_[itau]
-                st_tau_isoMedium      = tau_isoMedium_[itau]
-		st_tau_isoTight       = tau_isoTight_[itau]
+            for itau in pass_tau_index_cleaned:
+		st_Taudisc_againstLooseMuon.push_back(bool(Taudisc_againstLooseMuon[itau]))
+		st_Taudisc_againstTightMuon.push_back(bool(Taudisc_againstTightMuon[itau]))
+                st_Taudisc_againstLooseElectron.push_back(bool(Taudisc_againstLooseElectron[itau]))
+                st_Taudisc_againstMediumElectron.push_back(bool(Taudisc_againstMediumElectron[itau]))
+                st_tau_isoLoose.push_back(bool(tau_isLoose_[itau]))
+                st_tau_isoMedium.push_back(bool(tau_isoMedium_[itau]))
+		st_tau_isoTight.push_back(bool(tau_isoTight_[itau]))
+                st_tau_dm.push_back(bool(tau_dm_[itau]))
             # st_nTauTightElectron[0] = len(myTausTightElectron)
             # st_nTauTightMuon[0] = len(myTausTightMuon)
             # st_nTauTightEleMu[0] = len(myTausTightEleMu)

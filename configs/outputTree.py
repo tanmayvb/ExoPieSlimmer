@@ -122,7 +122,7 @@ st_Taudisc_againstMediumElectron  = ROOT.std.vector('bool')()
 st_tau_isoLoose        = ROOT.std.vector('bool')()  
 st_tau_isoMedium       = ROOT.std.vector('bool')()
 st_tau_isoTight        = ROOT.std.vector('bool')()      
-
+st_tau_dm              = ROOT.std.vector('bool')()
     ## add against mu and against mu loose and medium WP 
 
 mcweight               = array( 'f', [ 0 ] )
