@@ -18,7 +18,7 @@ from multiprocessing import Process
 import multiprocessing as mp
 
 
-isCondor = True
+isCondor = False
 
 ## user packages
 ## in local dir
@@ -263,7 +263,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_genParPy' , st_genParPy )
     outTree.Branch( 'st_genParPz', st_genParPz )
     outTree.Branch( 'st_genParEnergy', st_genParEnergy )
-    
+    '''    
     outTree.Branch( 'WenuRecoil', WenuRecoil, 'WenuRecoil/F')
     outTree.Branch( 'Wenumass', Wenumass, 'Wenumass/F')
     outTree.Branch( 'WenuPhi', WenuPhi, 'WenuPhi/F')
@@ -282,7 +282,7 @@ def runbbdm(txtfile):
     
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
-
+    '''
 
     # trigger status branches
     outTree.Branch( 'st_eletrigdecision', st_eletrigdecision , 'st_eletrigdecision/O')
@@ -844,7 +844,7 @@ def runbbdm(txtfile):
             GammaRecoilStatus = (GammaRecoil[0] > 170)
             if debug_: print 'Reached Gamma CR'
 
-            if pfmetstatus==False:continue #and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
+            #if pfmetstatus==False and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
             outTree.Fill()
 
     #outfile = TFile(outfilenameis,'RECREATE')
