@@ -109,7 +109,7 @@ st_muPz                = ROOT.std.vector('float')()
 st_muEnergy            = ROOT.std.vector('float')()
 st_isTightMuon         = ROOT.std.vector('bool')()
     #st_muIso              = ROOT.std.vector('float')()
-
+'''
 st_HPSTau_n            = array( 'L', [ 0 ] ) #ROOT.std.vector('int')()
 st_nTauTightElectron   = array( 'L', [ 0 ] )
 st_nTauTightMuon       = array( 'L', [ 0 ] )
@@ -123,7 +123,14 @@ st_tau_isoLoose        = ROOT.std.vector('bool')()
 st_tau_isoMedium       = ROOT.std.vector('bool')()
 st_tau_isoTight        = ROOT.std.vector('bool')()      
 st_tau_dm              = ROOT.std.vector('bool')()
+'''
     ## add against mu and against mu loose and medium WP 
+
+st_nTau_DRBased_EleMuVeto               = array( 'L', [ 0 ] )
+st_nTau_discBased_looseElelooseMuVeto   = array( 'L', [ 0 ] )
+st_nTau_discBased_looseEleTightMuVeto   = array( 'L', [ 0 ] )
+st_nTau_discBased_mediumElelooseMuVeto  = array( 'L', [ 0 ] )
+st_nTau_discBased_TightEleTightMuVeto   = array( 'L', [ 0 ] )
 
 mcweight               = array( 'f', [ 0 ] )
 st_pu_nTrueInt         = array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()

@@ -238,17 +238,24 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_isTightMuon', st_isTightMuon)#, 'st_isTightMuon/O' )
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
     
-    outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
+    #outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
+    outTree.Branch( 'st_nTau_DRBased_EleMuVeto',st_nTau_DRBased_EleMuVeto,'st_nTau_DRBased_EleMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_looseElelooseMuVeto',st_nTau_discBased_looseElelooseMuVeto,'st_nTau_discBased_looseElelooseMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_looseEleTightMuVeto',st_nTau_discBased_looseEleTightMuVeto,'st_nTau_discBased_looseEleTightMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_mediumElelooseMuVeto',st_nTau_discBased_mediumElelooseMuVeto,'st_nTau_discBased_mediumElelooseMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_TightEleTightMuVeto',st_nTau_discBased_TightEleTightMuVeto,'st_nTau_discBased_TightEleTightMuVeto/L')
+
+    '''
     outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon)
     outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon)
     outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron)
     outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron)
-
+     
     outTree.Branch( 'st_tau_isoLoose', st_tau_isoLoose)
     outTree.Branch( 'st_tau_isoMedium', st_tau_isoMedium)
     outTree.Branch( 'st_tau_isoTight', st_tau_isoTight)
     outTree.Branch('st_tau_dm',st_tau_dm)
-    
+    '''
 
     
     outTree.Branch( 'st_pu_nTrueInt', st_pu_nTrueInt, 'st_pu_nTrueInt/F')
@@ -309,7 +316,7 @@ def runbbdm(txtfile):
                 eleCharge_, npho_,phopx_,phopy_,phopz_,phoe_,pholooseid_,photightID_,\
                 nmu_,mupx_,mupy_,mupz_,mue_,mulooseid_,mutightid_,muisoloose, muisomedium, muisotight, muisovtight, muCharge_,\
                 nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,tau_isoMedium_,tau_isoTight_,\
-                Taudisc_againstLooseMuon,Taudisc_againstTightMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,\
+                Taudisc_againstLooseMuon,Taudisc_againstTightMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,Taudisc_againstTightElectron,\
                 nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
                 nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
                 ak4TightID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
@@ -326,7 +333,7 @@ def runbbdm(txtfile):
                            df.eleCharge,df.nPho,df.phoPx,df.phoPy,df.phoPz,df.phoEnergy,df.phoIsPassLoose,df.phoIsPassTight,\
                            df.nMu,df.muPx,df.muPy,df.muPz,df.muEnergy,df.isLooseMuon,df.isTightMuon,df.PFIsoLoose, df.PFIsoMedium, df.PFIsoTight, df.PFIsoVeryTight, df.muCharge,\
                            df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byMediumIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byTightIsolationMVArun2017v2DBoldDMwLT2017,\
-                           df.disc_againstMuonLoose3,df.disc_againstMuonTight3,df.disc_againstElectronLooseMVA6,df.disc_againstElectronMediumMVA6,\
+                           df.disc_againstMuonLoose3,df.disc_againstMuonTight3,df.disc_againstElectronLooseMVA6,df.disc_againstElectronMediumMVA6,df.disc_againstElectronTightMVA6,\
                            df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
                            df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
                            df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
@@ -472,7 +479,7 @@ def runbbdm(txtfile):
                 DRCut = 0.4
                 jetCleanAgainstEle = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, ele_pt10_eta2p5_vetoID, ak4eta, eleeta, ak4phi, elephi, DRCut)
                 jetCleanAgainstMu  = anautil.jetcleaning(ak4_pt30_eta4p5_IDT, mu_pt10_eta2p4_looseID_looseISO, ak4eta, mueta, ak4phi, muphi, DRCut)
-                jetCleaned = boolutil.logical_AND_List2(jetCleanAgainstEle, jetCleanAgainstMu)
+                jetCleaned = boolutil.logical_AND_List3(ak4_pt30_eta4p5_IDT,jetCleanAgainstEle, jetCleanAgainstMu)
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
 
@@ -502,7 +509,7 @@ def runbbdm(txtfile):
             if len(fatjet_pt200_eta2p5_IDT) > 0:
                 fatjetCleanAgainstEle = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, ele_pt10_eta2p5_vetoID, fatjeteta, eleeta, fatjetphi, elephi, DRCut)
                 fatjetCleanAgainstMu  = anautil.jetcleaning(fatjet_pt200_eta2p5_IDT, mu_pt10_eta2p4_looseID_looseISO, fatjeteta, mueta, fatjetphi, muphi, DRCut)
-                fatjetCleaned = boolutil.logical_AND_List2(fatjetCleanAgainstEle, fatjetCleanAgainstMu)
+                fatjetCleaned = boolutil.logical_AND_List3(fatjet_pt200_eta2p5_IDT, fatjetCleanAgainstEle, fatjetCleanAgainstMu)
                 pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned)
                 if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetpx)
 
@@ -523,17 +530,30 @@ def runbbdm(txtfile):
             tau_eta2p3_iDLdm_pt18 = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) ) for itau in range(nTau_)]
 
             if debug_:print "tau_eta2p3_iDLdm_pt18 = ", tau_eta2p3_iDLdm_pt18
+            tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstLooseMuon[itau]) ) for itau in range(nTau_)] 
+            tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstTightMuon[itau]) ) for itau in range(nTau_)]
+            tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstMediumElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
+            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)] 
 
+            tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto)
+            tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto)
+            tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto)
+            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto) 
+            '''
+            print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto
+            print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto',tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto
+            print 'tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index',tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index,'tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto',tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto
+            print 'tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index',tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index,'tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto',tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto
+            '''
             tauCleanAgainstEle = []
             tauCleanAgainstMu = []
-            pass_tau_index_cleaned = []
+            pass_tau_index_cleaned_DRBased = []
             if len(tau_eta2p3_iDLdm_pt18)>0:
                 tauCleanAgainstEle = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
                 tauCleanAgainstMu  = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
-                tauCleaned = boolutil.logical_AND_List2(tauCleanAgainstEle, tauCleanAgainstMu)
-                pass_tau_index_cleaned = boolutil.WhereIsTrue(tauCleaned)
-                if debug_:print "pass_tau_index_cleaned",pass_tau_index_cleaned
-
+                tauCleaned = boolutil.logical_AND_List3(tau_eta2p3_iDLdm_pt18 , tauCleanAgainstEle, tauCleanAgainstMu)
+                pass_tau_index_cleaned_DRBased = boolutil.WhereIsTrue(tauCleaned)
+                if debug_:print "pass_tau_index_cleaned_DRBased",pass_tau_index_cleaned_DRBased
 
             # -------------------------------------------------------------
             st_runId[0]             = long(run)
@@ -592,7 +612,7 @@ def runbbdm(txtfile):
             st_fjetCHSPRMass.clear()
             st_fjetCHSSDMass.clear()
 
-
+            '''
             st_Taudisc_againstLooseMuon.clear()
             st_Taudisc_againstTightMuon.clear()
             st_Taudisc_againstLooseElectron.clear()
@@ -601,7 +621,7 @@ def runbbdm(txtfile):
             st_tau_isoMedium.clear()
             st_tau_isoTight.clear()
             st_tau_dm.clear()
-
+            '''
 
             st_elePx.clear()
             st_elePy.clear()
@@ -693,7 +713,14 @@ def runbbdm(txtfile):
                 #st_muIso.push_back(muIso_[imu])
             if debug_:print 'nMu: ',len(pass_mu_index)
 
-            st_HPSTau_n[0] = len(pass_tau_index_cleaned)
+            st_nTau_DRBased_EleMuVeto[0] = len(pass_tau_index_cleaned_DRBased)
+            st_nTau_discBased_looseElelooseMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index)
+            st_nTau_discBased_looseEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index)
+            st_nTau_discBased_mediumElelooseMuVeto[0]   = len(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index)
+            st_nTau_discBased_TightEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
+            if debug_:print 'nTau: ',len(pass_tau_index_cleaned_DRBased)
+            print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
+            '''
             for itau in pass_tau_index_cleaned:
 		st_Taudisc_againstLooseMuon.push_back(bool(Taudisc_againstLooseMuon[itau]))
 		st_Taudisc_againstTightMuon.push_back(bool(Taudisc_againstTightMuon[itau]))
@@ -703,11 +730,7 @@ def runbbdm(txtfile):
                 st_tau_isoMedium.push_back(bool(tau_isoMedium_[itau]))
 		st_tau_isoTight.push_back(bool(tau_isoTight_[itau]))
                 st_tau_dm.push_back(bool(tau_dm_[itau]))
-            # st_nTauTightElectron[0] = len(myTausTightElectron)
-            # st_nTauTightMuon[0] = len(myTausTightMuon)
-            # st_nTauTightEleMu[0] = len(myTausTightEleMu)
-            # st_nTauLooseEleMu[0] = len(myTausLooseEleMu)
-            if debug_:print 'nTau: ',len(pass_tau_index_cleaned)
+            '''
 
             st_nPho[0]=len(pass_pho_index)
             for ipho in pass_pho_index:
