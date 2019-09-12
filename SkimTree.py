@@ -450,8 +450,8 @@ def runbbdm(txtfile):
             mueta = [getEta(mupx_[imu], mupy_[imu], mupz_[imu]) for imu in range(nmu_)]
             muphi = [getPhi(mupx_[imu], mupy_[imu]) for imu in range(nmu_)]
 
-            mu_pt10_eta2p4_looseID_looseISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mulooseid_[imu])  and (muisoloose[imu]) )  for imu in range(nmu_) ]
-            mu_pt30_eta2p4_tightID_tightISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu])) and (mutightid_[imu])  and (muisotight[imu]) )  for imu in range(nmu_) ]
+            mu_pt10_eta2p4_looseID_looseISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu]) < 2.4 ) and (mulooseid_[imu])  and (muisoloose[imu]) )  for imu in range(nmu_) ]
+            mu_pt30_eta2p4_tightID_tightISO  = [ ( (mupt[imu] > 10.0) and (abs(mueta[imu]) < 2.4 ) and (mutightid_[imu])  and (muisotight[imu]) )  for imu in range(nmu_) ]
 
             pass_mu_index = boolutil.WhereIsTrue(mu_pt10_eta2p4_looseID_looseISO)
 
@@ -719,7 +719,7 @@ def runbbdm(txtfile):
             st_nTau_discBased_mediumElelooseMuVeto[0]   = len(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index)
             st_nTau_discBased_TightEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
             if debug_:print 'nTau: ',len(pass_tau_index_cleaned_DRBased)
-            print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
+            #print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
             '''
             for itau in pass_tau_index_cleaned:
 		st_Taudisc_againstLooseMuon.push_back(bool(Taudisc_againstLooseMuon[itau]))
