@@ -156,8 +156,8 @@ def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,genParP4,st_ge
             if ( abs(PID) == 6) :
                 goodLepID.append(ig)
         if(len(goodLepID)==2):
-            pt_list.append(getPt(st_genParPx[goodLepID[0],st_genParPy[goodLepID[0]]))
-            pt_list.append(getPt(st_genParPx[goodLepID[1],st_genParPy[goodLepID[1]]))
+            pt_list.append(getPt(st_genParPx[goodLepID[0]],st_genParPy[goodLepID[0]]))
+            pt_list.append(getPt(st_genParPx[goodLepID[1]],st_genParPy[goodLepID[1]]))
 
     return pt_list
 
