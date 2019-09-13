@@ -37,11 +37,11 @@ st_pfMetUncJetResUp       = ROOT.std.vector('float')()
 st_pfMetUncJetResDown     = ROOT.std.vector('float')()
 st_pfMetUncJetEnUp        = ROOT.std.vector('float')()
 st_pfMetUncJetEnDown      = ROOT.std.vector('float')()
-    ## add calo met 
-    ## add modified met 
+    ## add calo met
+    ## add modified met
 
 
-    ## now we have only one flag for one object trigger 
+    ## now we have only one flag for one object trigger
 st_eleTrig                = array( 'b', [0] )
 st_muTrig                = array( 'b', [0] )
 st_metTrig                = array( 'b', [0] )
@@ -119,12 +119,12 @@ st_Taudisc_againstLooseMuon       = ROOT.std.vector('bool')()
 st_Taudisc_againstTightMuon      = ROOT.std.vector('bool')()
 st_Taudisc_againstLooseElectron   = ROOT.std.vector('bool')()
 st_Taudisc_againstMediumElectron  = ROOT.std.vector('bool')()
-st_tau_isoLoose        = ROOT.std.vector('bool')()  
+st_tau_isoLoose        = ROOT.std.vector('bool')()
 st_tau_isoMedium       = ROOT.std.vector('bool')()
-st_tau_isoTight        = ROOT.std.vector('bool')()      
+st_tau_isoTight        = ROOT.std.vector('bool')()
 st_tau_dm              = ROOT.std.vector('bool')()
 '''
-    ## add against mu and against mu loose and medium WP 
+    ## add against mu and against mu loose and medium WP
 
 st_nTau_DRBased_EleMuVeto               = array( 'L', [ 0 ] )
 st_nTau_discBased_looseElelooseMuVeto   = array( 'L', [ 0 ] )
@@ -145,6 +145,8 @@ st_genParPx            = ROOT.std.vector('float')()
 st_genParPy            = ROOT.std.vector('float')()
 st_genParPz            = ROOT.std.vector('float')()
 st_genParEnergy        = ROOT.std.vector('float')()
+st_genParPt            = ROOT.std.vector('float')()
+st_genParSample        = ROOT.std.vector('int')()
 
 WenuRecoil             = array( 'f', [ 0. ] )
 Wenumass               = array( 'f', [ 0. ] )
