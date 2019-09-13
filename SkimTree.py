@@ -408,7 +408,7 @@ def runbbdm(txtfile):
 
 
             if not isData:     filterdecision = True
-            if isData:         filterdecision  = boolutil.logical_OR(filterstatus)
+            if isData:         filterdecision  = boolutil.logical_AND(filterstatus)
 
             if filterdecision == False: continue
 
