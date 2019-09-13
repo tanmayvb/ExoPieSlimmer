@@ -1,3 +1,9 @@
+import numpy
+
+def getPt(px_, py_):
+    return  numpy.sqrt( px_**2 + py_**2)
+
+
 def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,st_genParPx,st_genParPy):
     pt_list=[]
     #################
