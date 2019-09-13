@@ -108,7 +108,7 @@ def whichsample(filename):
         sample = 23
     return sample
 
-def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,genParP4,st_genParPx,st_genParPy):
+def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,st_genParPx,st_genParPy):
     pt_list=[]
     #################
     # WJets
