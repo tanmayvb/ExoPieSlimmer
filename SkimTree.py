@@ -13,7 +13,7 @@ from pandas import Series
 import time
 import glob
 
-## for parallel threads in interactive running 
+## for parallel threads in interactive running
 from multiprocessing import Process
 import multiprocessing as mp
 
@@ -98,13 +98,74 @@ infilename = "NCUGlobalTuples.root"
 
 debug_ = False
 
+def whichsample(filename):
+    sample = -999
+    if "TTT" in filename:
+        sample = 6
+    elif "WJetsToLNu_HT" in filename:
+        sample = 24
+    elif "ZJetsToLNu_HT" in filename:
+        sample = 23
+    return sample
 
+def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,st_genParPx,st_genParPy):
+    pt_list=[]
+    #################
+    # WJets
+    #################
+    if sample==24:
+        goodLepID = []
+        for ig in range(nGenPar):
+            PID    = genParId[ig]
+            momPID = genMomParId[ig]
+            status = genParSt[ig]
+            if ( (abs(PID) != 11) & (abs(PID) != 12) &  (abs(PID) != 13) & (abs(PID) != 14) &  (abs(PID) != 15) &  (abs(PID) != 16) ): continue
+            if ( ( (status != 1) & (abs(PID) != 15)) | ( (status != 2) & (abs(PID) == 15)) ): continue
+            if ( (abs(momPID) != 24) & (momPID != PID) ): continue
+            goodLepID.append(ig)
+
+        if len(goodLepID) == 2 :
+            pt_list.append(getPt((st_genParPx[goodLepID[0]]+st_genParPx[goodLepID[1]]),(st_genParPy[goodLepID[0]]+st_genParPy[goodLepID[1]])))
+    #################
+    #ZJets
+    #################
+    if sample == 23:
+        goodLepID = []
+        for ig in range(nGenPar):
+            PID    = genParId[ig]
+            momPID = genMomParId[ig]
+            status = genParSt[ig]
+
+
+            if ( (abs(PID) != 12) &  (abs(PID) != 14) &  (abs(PID) != 16) ) : continue
+            if ( status != 1 ) : continue
+            if ( (momPID != 23) & (momPID != PID) ) : continue
+            goodLepID.append(ig)
+
+        if len(goodLepID) == 2 :
+            pt_list.append(getPt((st_genParPx[goodLepID[0]]+st_genParPx[goodLepID[1]]),(st_genParPy[goodLepID[0]]+st_genParPy[goodLepID[1]])))
+    #################
+    #TTBar
+    #################
+    if (sample==6):
+        goodLepID = []
+        for ig in range(nGenPar):
+            PID    = genParId[ig]
+            momPID = genMomParId[ig]
+            status = genParSt[ig]
+            if ( abs(PID) == 6) :
+                goodLepID.append(ig)
+        if(len(goodLepID)==2):
+            pt_list.append(getPt(st_genParPx[goodLepID[0]],st_genParPy[goodLepID[0]]))
+            pt_list.append(getPt(st_genParPx[goodLepID[1]],st_genParPy[goodLepID[1]]))
+
+    return pt_list
 
 def TextToList(textfile):
     return([iline.rstrip()    for iline in open(textfile)])
 
-## the input file list and key is caught in one variable as a python list, 
-#### first element is the list of rootfiles 
+## the input file list and key is caught in one variable as a python list,
+#### first element is the list of rootfiles
 #### second element is the key, user to name output.root
 
 def runbbdm(txtfile):
@@ -112,25 +173,25 @@ def runbbdm(txtfile):
     outfilename=""
     prefix="Skimmed_"
     ikey_ = ""
-    
+
     if not runInteractive:
         print "running for ", txtfile
         infile_  = TextToList(txtfile)
         outfile = txtfile.split('/')[-1].replace('.txt','.root')
         #key_=txtfile[1]
-    
+
         ''' old
         prefix="Skimmed_"
         outfilename= prefix+infile_.split("/")[-1]
         '''
-    
+
         outfilename= outfile#prefix+key_+".root"
-        print "outfilename", outfilename 
-        
-    if runInteractive: 
+        print "outfilename", outfilename
+
+    if runInteractive:
         #infile_=txtfile
 	#print "infile_", infile_
-        #ikey_ = txtfile[0].split("/")[-5] ## after the crabConfig bug fix this will become -4 
+        #ikey_ = txtfile[0].split("/")[-5] ## after the crabConfig bug fix this will become -4
 	#print "ikey_", ikey_
         #outfilename=prefix+ikey_+".root"
 	infile_=TextToList(txtfile)
@@ -139,28 +200,30 @@ def runbbdm(txtfile):
         if outputdir!='.': prefix_ = outputdir+'/'
         #print "prefix_", prefix_
         outfilename = prefix_+txtfile.split('/')[-1].replace('.txt','.root')#"SkimmedTree.root"
-        print 'outfilename',  outfilename 
-    
-    
-    
+        print 'outfilename',  outfilename
+
+    samplename = whichsample(outfilename)
+
+
+
     #outputfilename = args.outputfile
     h_total = TH1F('h_total','h_total',2,0,2)
     h_total_mcweight = TH1F('h_total_mcweight','h_total_mcweight',2,0,2)
 
     triglist = trig.trigger2016
     passfilename = open("configs/outfilename.txt","w")
-    
+
     passfilename.write(outfilename)
     passfilename.close()
 
     ## this will give some warning, but that is safe,
     from  outputTree  import *
-    
-    ## following can be moved to outputtree.py if we manage to change the name of output root file. 
+
+    ## following can be moved to outputtree.py if we manage to change the name of output root file.
     outfilenameis = outfilename
     outfile = TFile(outfilenameis,'RECREATE')
     outTree = TTree( 'outTree', 'tree branches' )
-    
+
     outTree.Branch( 'st_runId', st_runId , 'st_runId/L')
     outTree.Branch( 'st_lumiSection', st_lumiSection , 'st_lumiSection/L')
     outTree.Branch( 'st_eventId',  st_eventId, 'st_eventId/L')
@@ -171,8 +234,8 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_pfMetUncJetEnUp', st_pfMetUncJetEnUp )
     outTree.Branch( 'st_pfMetUncJetEnDown', st_pfMetUncJetEnDown)
     outTree.Branch( 'st_isData', st_isData , 'st_isData/O')
-    
-    
+
+
     outTree.Branch( 'st_THINnJet',st_THINnJet, 'st_THINnJet/L' )
     outTree.Branch( 'st_THINjetPx', st_THINjetPx  )
     outTree.Branch( 'st_THINjetPy' , st_THINjetPy )
@@ -182,14 +245,14 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_THINjetHadronFlavor',st_THINjetHadronFlavor )
     outTree.Branch( 'st_THINjetNHadEF',st_THINjetNHadEF )
     outTree.Branch( 'st_THINjetCHadEF',st_THINjetCHadEF )
-    
+
     outTree.Branch( 'st_THINjetCEmEF',st_THINjetCEmEF )
     outTree.Branch( 'st_THINjetPhoEF',st_THINjetPhoEF )
     outTree.Branch( 'st_THINjetEleEF',st_THINjetEleEF )
     outTree.Branch( 'st_THINjetMuoEF',st_THINjetMuoEF )
     outTree.Branch('st_THINjetCorrUnc', st_THINjetCorrUnc)
-    
-    
+
+
     outTree.Branch( 'st_nfjet',st_nfjet,'st_nfjet/L')
     outTree.Branch( 'st_fjetPx',st_fjetPx)
     outTree.Branch( 'st_fjetPy',st_fjetPy)
@@ -211,7 +274,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_fjetN2b2',st_fjetN2b2)
     outTree.Branch( 'st_fjetCHSPRMass',st_fjetCHSPRMass)
     outTree.Branch( 'st_fjetCHSSDMass',st_fjetCHSSDMass)
-    
+
 
 
     outTree.Branch( 'st_nEle',st_nEle , 'st_nEle/L')
@@ -221,7 +284,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_eleEnergy', st_eleEnergy )
     outTree.Branch( 'st_eleIsPassTight', st_eleIsPassTight)#, 'st_eleIsPassTight/O' )
     outTree.Branch( 'st_eleIsPassLoose', st_eleIsPassLoose)#, 'st_eleIsPassLoose/O' )
-    
+
     outTree.Branch( 'st_nPho',st_nPho , 'st_nPho/L')
     outTree.Branch( 'st_phoIsPassTight', st_phoIsPassTight)#, 'st_phoIsPassTight/O' )
     outTree.Branch( 'st_phoPx', st_phoPx  )
@@ -237,7 +300,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_muEnergy', st_muEnergy)
     outTree.Branch( 'st_isTightMuon', st_isTightMuon)#, 'st_isTightMuon/O' )
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
-    
+
     #outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
     outTree.Branch( 'st_nTau_DRBased_EleMuVeto',st_nTau_DRBased_EleMuVeto,'st_nTau_DRBased_EleMuVeto/L')
     outTree.Branch( 'st_nTau_discBased_looseElelooseMuVeto',st_nTau_discBased_looseElelooseMuVeto,'st_nTau_discBased_looseElelooseMuVeto/L')
@@ -250,43 +313,46 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_Taudisc_againstTightMuon', st_Taudisc_againstTightMuon)
     outTree.Branch( 'st_Taudisc_againstLooseElectron', st_Taudisc_againstLooseElectron)
     outTree.Branch( 'st_Taudisc_againstMediumElectron', st_Taudisc_againstMediumElectron)
-     
+
     outTree.Branch( 'st_tau_isoLoose', st_tau_isoLoose)
     outTree.Branch( 'st_tau_isoMedium', st_tau_isoMedium)
     outTree.Branch( 'st_tau_isoTight', st_tau_isoTight)
     outTree.Branch('st_tau_dm',st_tau_dm)
     '''
 
-    
+
     outTree.Branch( 'st_pu_nTrueInt', st_pu_nTrueInt, 'st_pu_nTrueInt/F')
     outTree.Branch( 'st_pu_nPUVert', st_pu_nPUVert, 'st_pu_nPUVert/F')
     outTree.Branch( 'st_THINjetNPV', st_THINjetNPV, 'st_THINjetNPV/F')
     outTree.Branch( 'mcweight', mcweight, 'mcweight/F')
-    outTree.Branch( 'st_nGenPar',st_nGenPar,'st_nGenPar/L' )  #nGenPar/I
-    outTree.Branch( 'st_genParId',st_genParId )  #vector<int>
-    outTree.Branch( 'st_genMomParId',st_genMomParId )
-    outTree.Branch( 'st_genParSt',st_genParSt )
-    outTree.Branch( 'st_genParPx', st_genParPx  )
-    outTree.Branch( 'st_genParPy' , st_genParPy )
-    outTree.Branch( 'st_genParPz', st_genParPz )
-    outTree.Branch( 'st_genParEnergy', st_genParEnergy )
-    '''    
+    # outTree.Branch( 'st_nGenPar',st_nGenPar,'st_nGenPar/L' )  #nGenPar/I
+    # outTree.Branch( 'st_genParId',st_genParId )  #vector<int>
+    # outTree.Branch( 'st_genMomParId',st_genMomParId )
+    # outTree.Branch( 'st_genParSt',st_genParSt )
+    # outTree.Branch( 'st_genParPx', st_genParPx  )
+    # outTree.Branch( 'st_genParPy' , st_genParPy )
+    # outTree.Branch( 'st_genParPz', st_genParPz )
+    # outTree.Branch( 'st_genParEnergy', st_genParEnergy )
+    outTree.Branch( 'st_genParPt', st_genParPt, )
+    outTree.Branch( 'st_genParSample', st_genParSample )
+
+    '''
     outTree.Branch( 'WenuRecoil', WenuRecoil, 'WenuRecoil/F')
     outTree.Branch( 'Wenumass', Wenumass, 'Wenumass/F')
     outTree.Branch( 'WenuPhi', WenuPhi, 'WenuPhi/F')
-    
+
     outTree.Branch( 'WmunuRecoil', WmunuRecoil, 'WmunuRecoil/F')
     outTree.Branch( 'Wmunumass', Wmunumass, 'Wmunumass/F')
     outTree.Branch( 'WmunuPhi', WmunuPhi, 'WmunuPhi/F')
-    
+
     outTree.Branch( 'ZeeRecoil', ZeeRecoil, 'ZeeRecoil/F')
     outTree.Branch( 'ZeeMass', ZeeMass, 'ZeeMass/F')
     outTree.Branch( 'ZeePhi', ZeePhi, 'ZeePhi/F')
-    
+
     outTree.Branch( 'ZmumuRecoil', ZmumuRecoil, 'ZmumuRecoil/F')
     outTree.Branch( 'ZmumuMass', ZmumuMass, 'ZmumuMass/F')
     outTree.Branch( 'ZmumuPhi', ZmumuPhi, 'ZmumuPhi/F')
-    
+
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
     '''
@@ -296,18 +362,18 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_mutrigdecision', st_mutrigdecision , 'st_mutrigdecision/O')
     outTree.Branch( 'st_mettrigdecision', st_mettrigdecision , 'st_mettrigdecision/O')
     outTree.Branch( 'st_photrigdecision', st_photrigdecision , 'st_photrigdecision/O')
-    
-    ## following can be moved to outputtree.py if we manage to change the name of output root file. 
 
-    
+    ## following can be moved to outputtree.py if we manage to change the name of output root file.
+
+
     jetvariables = branches.allvars2017
 
     filename = infile_
-    
+
     ieve = 0;icount = 0
     #print "running on", filename
     for df in read_root(filename, 'tree/treeMaker', columns=jetvariables, chunksize=125000):
-        
+
         for run,lumi,event,isData,mcWeight_,\
                 pu_nTrueInt_,pu_nPUVert_,\
                 trigName_,trigResult_,filterName,filterResult,\
@@ -342,8 +408,8 @@ def runbbdm(txtfile):
                            df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                            df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
                            df.FATjetSDmass, df.FATN2_Beta1_, df.FATN2_Beta2_, df.FATjetCHSPRmassL2L3Corr, df.FATjetCHSSDmassL2L3Corr               ):
-            
-            
+
+
             if debug_: print len(trigName_),len(trigResult_),len(filterName),len(filterResult),len(metUnc_), len(elepx_), len(elepy_), len(elepz_), len(elee_), len(elevetoid_), len(elelooseid_), len(eletightid_), len(eleCharge_), npho_,len(phopx_), len(phopy_), len(phopz_), len(phoe_), len(pholooseid_), len(photightID_), nmu_, len(mupx_), len(mupy_), len(mupz_), len(mue_), len(mulooseid_), len(mutightid_), len(muisoloose), len(muisomedium), len(muisotight), len(muisovtight), len(muCharge_), nTau_, len(tau_px_), len(tau_py_), len(tau_pz_), len(tau_e_), len(tau_dm_), len(tau_isLoose_), len(genParId_), len(genMomParId_), len(genParSt_), len(genpx_), len(genpy_), len(genpz_), len(gene_), len(ak4px_), len(ak4py_), len(ak4pz_), len(ak4e_), len(ak4TightID_), len(ak4deepcsv_), len(ak4flavor_), len(ak4NHEF_), len(ak4CHEF_), len(ak4CEmEF_), len(ak4PhEF_), len(ak4EleEF_), len(ak4MuEF_), len(ak4JEC_), len(fatjetPx), len(fatjetPy), len(fatjetPz), len(fatjetEnergy), len(fatjetTightID), len(fatjet_DoubleSV), len(fatjet_probQCDb), len(fatjet_probHbb), len(fatjet_probQCDc), len(fatjet_probHcc), len(fatjet_probHbbc), len(fatjet_prob_bbvsLight), len(fatjet_prob_ccvsLight), len(fatjet_prob_TvsQCD), len(fatjet_prob_WvsQCD), len(fatjet_prob_ZHbbvsQCD), len(fatjetSDmass), len(fatN2_Beta1_), len(fatN2_Beta2_), len(fatjetCHSPRmassL2L3Corr), len(fatjetCHSSDmassL2L3Corr)
 
             if ieve%1000==0: print "Processed",ieve,"Events"
@@ -483,15 +549,12 @@ def runbbdm(txtfile):
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
 
-
-
             '''
             ******      *******   *****   *******
             *              *      *          *
             *****  ----    *      ****       *
             *              *      *          *
             *           ***       *****      *
-
 
             '''
             fatjetpt = [getPt(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
@@ -513,8 +576,6 @@ def runbbdm(txtfile):
                 pass_fatjet_index_cleaned = boolutil.WhereIsTrue(fatjetCleaned)
                 if debug_:print "pass_fatjet_index_cleaned = ", pass_fatjet_index_cleaned," nJets =   ",len(fatjetpx)
 
-
-
             '''
             ********    *        *       *
                *      *    *     *       *
@@ -530,15 +591,15 @@ def runbbdm(txtfile):
             tau_eta2p3_iDLdm_pt18 = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) ) for itau in range(nTau_)]
 
             if debug_:print "tau_eta2p3_iDLdm_pt18 = ", tau_eta2p3_iDLdm_pt18
-            tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstLooseMuon[itau]) ) for itau in range(nTau_)] 
+            tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstLooseMuon[itau]) ) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstTightMuon[itau]) ) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstMediumElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)] 
+            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
 
             tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto)
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto)
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto)
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto) 
+            tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto)
             '''
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto',tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto
@@ -644,13 +705,15 @@ def runbbdm(txtfile):
             st_phoEnergy.clear()
             st_phoIsPassTight.clear()
 
-            st_genParId.clear()
-            st_genMomParId.clear()
-            st_genParSt.clear()
-            st_genParPx.clear()
-            st_genParPy.clear()
-            st_genParPz.clear()
-            st_genParEnergy.clear()
+            # st_genParId.clear()
+            # st_genMomParId.clear()
+            # st_genParSt.clear()
+            # st_genParPx.clear()
+            # st_genParPy.clear()
+            # st_genParPz.clear()
+            # st_genParEnergy.clear()
+            st_genParPt.clear()
+            st_genParSample.clear()
 
             st_THINnJet[0] = len(pass_jet_index_cleaned)
             for ithinjet in pass_jet_index_cleaned:
@@ -672,7 +735,7 @@ def runbbdm(txtfile):
 
             st_nfjet[0] = len(pass_fatjet_index_cleaned)
             for ifjet in pass_fatjet_index_cleaned:
-		st_fjetPx.push_back(fatjetPx[ifjet])
+                st_fjetPx.push_back(fatjetPx[ifjet])
                 st_fjetPy.push_back(fatjetPy[ifjet])
                 st_fjetPz.push_back(fatjetPz[ifjet])
                 st_fjetEnergy.push_back(fatjetEnergy[ifjet])
@@ -745,15 +808,20 @@ def runbbdm(txtfile):
             st_pu_nPUVert[0] = pu_nPUVert_
             st_THINjetNPV[0] = ak4NPV_
 
-            st_nGenPar[0] =  nGenPar_
-            for igp in range(nGenPar_):
-                st_genParId.push_back(int(genParId_[igp]))
-                st_genMomParId.push_back(int(genMomParId_[igp]))
-                st_genParSt.push_back(int(genParSt_[igp]))
-                st_genParPx.push_back(genpx_[igp])
-                st_genParPy.push_back(genpy_[igp])
-                st_genParPz.push_back(genpz_[igp])
-                st_genParEnergy.push_back(gene_[igp])
+            #st_nGenPar[0] =  nGenPar_
+            genpar_pt = GenPtProducer(samplename, nGenPar_, genParId_, genMomParId_, genParSt_,genpx_,genpy_)
+            for i in range(len(genpar_pt)):
+                st_genParPt.push_back(genpar_pt[i])
+            st_genParSample.push_back(samplename)
+
+            # for igp in range(nGenPar_):
+            #     st_genParId.push_back(int(genParId_[igp]))
+            #     st_genMomParId.push_back(int(genMomParId_[igp]))
+            #     st_genParSt.push_back(int(genParSt_[igp]))
+            #     st_genParPx.push_back(genpx_[igp])
+            #     st_genParPy.push_back(genpy_[igp])
+            #     st_genParPz.push_back(genpz_[igp])
+            #     st_genParEnergy.push_back(gene_[igp])
             if debug_: print 'nGen: ',nGenPar_
 
             st_pfMetUncJetResUp.push_back(metUnc_[0])
@@ -866,7 +934,6 @@ def runbbdm(txtfile):
                    GammaPhi[0] = mathutil.ep_arctan(GammaRecoilPx,GammaRecoilPy)
             GammaRecoilStatus = (GammaRecoil[0] > 170)
             if debug_: print 'Reached Gamma CR'
-
             #if pfmetstatus==False and ZRecoilstatus==False and WRecoilstatus==False and GammaRecoilStatus==False: continue
             outTree.Fill()
 
@@ -879,17 +946,12 @@ def runbbdm(txtfile):
     end = time.clock()
     print "%.4gs" % (end-start)
 
-
-
-
 #files=["/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190825_203128/0000/ExoPieElementTuples_1.root", "/eos/cms//store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8/DYJetsToLL_M_50_HT_400to600_TuneCP5_13TeV_30K/190825_203128/0000/ExoPieElementTuples_2.root"]
-
-
 
 if __name__ == '__main__':
     if not runInteractive:
         txtFile=infile
-	    
+
         runbbdm(txtFile)
 
     if runInteractive and runOnTxt:
@@ -900,7 +962,7 @@ if __name__ == '__main__':
         print 'final', final
         for i in range(len(final)):
             print 'first set', final[i]
-            
+
             try:
                 pool = mp.Pool(8)
                 pool.map(runbbdm,final[i])
@@ -910,17 +972,17 @@ if __name__ == '__main__':
 		print e
 		print "Corrupt file inside input txt file is detected! Skipping this txt file:  ", final[i]
 		continue
-            
+
     if runInteractive and not runOnTxt:
         ''' following part is for interactive running. This is still under testing because output file name can't be changed at this moment '''
         inputpath= "/eos/cms/store/group/phys_exotica/bbMET/ExoPieElementTuples/MC_2017miniaodV2_V1/"
 
         os.system('rm dirlist.txt')
         os.system("ls -1 "+inputpath+" > dirlist.txt")
-        
+
         allkeys=[idir.rstrip() for idir in open('dirlist.txt')]
         alldirs=[inputpath+"/"+idir.rstrip() for idir in open('dirlist.txt')]
-        
+
         pool = mp.Pool(6)
         allsample=[]
         for ikey in allkeys:
@@ -928,11 +990,10 @@ if __name__ == '__main__':
             txtfile=ikey+".txt"
             os.system ("find "+dirpath+"  -name \"*.root\" | grep -v \"failed\"  > "+txtfile)
             fileList=TextToList(txtfile)
-            ## this is the list, first element is txt file with all the files and second element is the ikey (kind of sample name identifier) 
+            ## this is the list, first element is txt file with all the files and second element is the ikey (kind of sample name identifier)
             sample_  = [txtfile, ikey]
-            ## push information about one sample into global list. 
+            ## push information about one sample into global list.
             allsample.append(sample_)
         print allsample
-        pool.map(runbbdm, allsample) 
-        ## this works fine but the output file name get same value becuase it is done via a text file at the moment, need to find a better way, 
-    
+        pool.map(runbbdm, allsample)
+        ## this works fine but the output file name get same value becuase it is done via a text file at the moment, need to find a better way,
