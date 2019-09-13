@@ -26,6 +26,7 @@ sys.path.append('configs')
 import  triggers as trig
 import variables as branches
 import filters as filters
+import genPtProducer as GenPtProd
 
 ## from commonutils
 if isCondor:sys.path.append('ExoPieUtils/commonutils/')
@@ -107,59 +108,6 @@ def whichsample(filename):
     elif "ZJetsToLNu_HT" in filename:
         sample = 23
     return sample
-
-def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,st_genParPx,st_genParPy):
-    pt_list=[]
-    #################
-    # WJets
-    #################
-    if sample==24:
-        goodLepID = []
-        for ig in range(nGenPar):
-            PID    = genParId[ig]
-            momPID = genMomParId[ig]
-            status = genParSt[ig]
-            if ( (abs(PID) != 11) & (abs(PID) != 12) &  (abs(PID) != 13) & (abs(PID) != 14) &  (abs(PID) != 15) &  (abs(PID) != 16) ): continue
-            if ( ( (status != 1) & (abs(PID) != 15)) | ( (status != 2) & (abs(PID) == 15)) ): continue
-            if ( (abs(momPID) != 24) & (momPID != PID) ): continue
-            goodLepID.append(ig)
-
-        if len(goodLepID) == 2 :
-            pt_list.append(getPt((st_genParPx[goodLepID[0]]+st_genParPx[goodLepID[1]]),(st_genParPy[goodLepID[0]]+st_genParPy[goodLepID[1]])))
-    #################
-    #ZJets
-    #################
-    if sample == 23:
-        goodLepID = []
-        for ig in range(nGenPar):
-            PID    = genParId[ig]
-            momPID = genMomParId[ig]
-            status = genParSt[ig]
-
-
-            if ( (abs(PID) != 12) &  (abs(PID) != 14) &  (abs(PID) != 16) ) : continue
-            if ( status != 1 ) : continue
-            if ( (momPID != 23) & (momPID != PID) ) : continue
-            goodLepID.append(ig)
-
-        if len(goodLepID) == 2 :
-            pt_list.append(getPt((st_genParPx[goodLepID[0]]+st_genParPx[goodLepID[1]]),(st_genParPy[goodLepID[0]]+st_genParPy[goodLepID[1]])))
-    #################
-    #TTBar
-    #################
-    if (sample==6):
-        goodLepID = []
-        for ig in range(nGenPar):
-            PID    = genParId[ig]
-            momPID = genMomParId[ig]
-            status = genParSt[ig]
-            if ( abs(PID) == 6) :
-                goodLepID.append(ig)
-        if(len(goodLepID)==2):
-            pt_list.append(getPt(st_genParPx[goodLepID[0]],st_genParPy[goodLepID[0]]))
-            pt_list.append(getPt(st_genParPx[goodLepID[1]],st_genParPy[goodLepID[1]]))
-
-    return pt_list
 
 def TextToList(textfile):
     return([iline.rstrip()    for iline in open(textfile)])
@@ -785,13 +733,13 @@ def runbbdm(txtfile):
             #print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
             '''
             for itau in pass_tau_index_cleaned:
-		st_Taudisc_againstLooseMuon.push_back(bool(Taudisc_againstLooseMuon[itau]))
-		st_Taudisc_againstTightMuon.push_back(bool(Taudisc_againstTightMuon[itau]))
+                st_Taudisc_againstLooseMuon.push_back(bool(Taudisc_againstLooseMuon[itau]))
+                st_Taudisc_againstTightMuon.push_back(bool(Taudisc_againstTightMuon[itau]))
                 st_Taudisc_againstLooseElectron.push_back(bool(Taudisc_againstLooseElectron[itau]))
                 st_Taudisc_againstMediumElectron.push_back(bool(Taudisc_againstMediumElectron[itau]))
                 st_tau_isoLoose.push_back(bool(tau_isLoose_[itau]))
                 st_tau_isoMedium.push_back(bool(tau_isoMedium_[itau]))
-		st_tau_isoTight.push_back(bool(tau_isoTight_[itau]))
+                st_tau_isoTight.push_back(bool(tau_isoTight_[itau]))
                 st_tau_dm.push_back(bool(tau_dm_[itau]))
             '''
 
@@ -809,7 +757,7 @@ def runbbdm(txtfile):
             st_THINjetNPV[0] = ak4NPV_
 
             #st_nGenPar[0] =  nGenPar_
-            genpar_pt = GenPtProducer(samplename, nGenPar_, genParId_, genMomParId_, genParSt_,genpx_,genpy_)
+            genpar_pt = GenPtProd.GenPtProducer(samplename, nGenPar_, genParId_, genMomParId_, genParSt_,genpx_,genpy_)
             for i in range(len(genpar_pt)):
                 st_genParPt.push_back(genpar_pt[i])
             st_genParSample.push_back(samplename)
