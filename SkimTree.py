@@ -333,8 +333,8 @@ def runbbdm(txtfile):
     # outTree.Branch( 'st_genParPy' , st_genParPy )
     # outTree.Branch( 'st_genParPz', st_genParPz )
     # outTree.Branch( 'st_genParEnergy', st_genParEnergy )
-    outTree.Branch( 'st_genParPt', st_genParPt,'st_genParPt/F' )
-    outTree.Branch( 'st_genParSample', st_genParSample,'st_genParSample/L' )
+    outTree.Branch( 'st_genParPt', st_genParPt, )
+    outTree.Branch( 'st_genParSample', st_genParSample )
 
     '''
     outTree.Branch( 'WenuRecoil', WenuRecoil, 'WenuRecoil/F')
