@@ -321,8 +321,10 @@ def runbbdm(txtfile):
 
     ## following can be moved to outputtree.py if we manage to change the name of output root file.
 
-
-    jetvariables = branches.allvars2017
+    if runOn2016:
+        jetvariables = branches.allvars2016
+    elif runOn2017:
+        jetvariables = branches.allvars2017
 
     filename = infile_
 
