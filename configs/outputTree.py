@@ -94,6 +94,8 @@ st_elePz               = ROOT.std.vector('float')()
 st_eleEnergy           = ROOT.std.vector('float')()
 st_eleIsPassLoose      = ROOT.std.vector('bool')()
 st_eleIsPassTight      = ROOT.std.vector('bool')()
+st_eleCharge           = ROOT.std.vector('float')()
+
 
 st_nPho                = array( 'L', [ 0 ] ) #ROOT.std.vector('int')()
 st_phoPx               = ROOT.std.vector('float')()
@@ -108,6 +110,7 @@ st_muPy                = ROOT.std.vector('float')()
 st_muPz                = ROOT.std.vector('float')()
 st_muEnergy            = ROOT.std.vector('float')()
 st_isTightMuon         = ROOT.std.vector('bool')()
+st_muCharge            = ROOT.std.vector('float')()
     #st_muIso              = ROOT.std.vector('float')()
 '''
 st_HPSTau_n            = array( 'L', [ 0 ] ) #ROOT.std.vector('int')()

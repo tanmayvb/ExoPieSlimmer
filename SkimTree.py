@@ -240,6 +240,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_eleEnergy', st_eleEnergy )
     outTree.Branch( 'st_eleIsPassTight', st_eleIsPassTight)#, 'st_eleIsPassTight/O' )
     outTree.Branch( 'st_eleIsPassLoose', st_eleIsPassLoose)#, 'st_eleIsPassLoose/O' )
+    outTree.Branch( 'st_eleCharge', st_eleCharge)
 
     outTree.Branch( 'st_nPho',st_nPho , 'st_nPho/L')
     outTree.Branch( 'st_phoIsPassTight', st_phoIsPassTight)#, 'st_phoIsPassTight/O' )
@@ -255,6 +256,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_muPz', st_muPz)
     outTree.Branch( 'st_muEnergy', st_muEnergy)
     outTree.Branch( 'st_isTightMuon', st_isTightMuon)#, 'st_isTightMuon/O' )
+    outTree.Branch( 'st_muCharge', st_muCharge)
     #outTree.Branch( 'st_muIso', st_muIso)#, 'st_muIso/F')
 
     #outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
@@ -661,12 +663,14 @@ def runbbdm(txtfile):
             st_eleEnergy.clear()
             st_eleIsPassTight.clear()
             st_eleIsPassLoose.clear()
+            st_eleCharge.clear()
 
             st_muPx.clear()
             st_muPy.clear()
             st_muPz.clear()
             st_muEnergy.clear()
             st_isTightMuon.clear()
+            st_muCharge.clear()
             #st_muIso.clear()
 
 
@@ -734,7 +738,9 @@ def runbbdm(txtfile):
                 st_elePy.push_back(elepy_[iele])
                 st_elePz.push_back(elepz_[iele])
                 st_eleEnergy.push_back(elee_[iele])
+                st_eleIsPassLoose.push_back(bool(elelooseid_[iele]))
                 st_eleIsPassTight.push_back(bool(eletightid_[iele]))
+                st_eleCharge.push_back(eleCharge_[iele])
             if debug_:print 'nEle: ',len(pass_ele_veto_index)
 
             st_nMu[0] = len(pass_mu_index)
@@ -744,6 +750,7 @@ def runbbdm(txtfile):
                 st_muPz.push_back(mupz_[imu])
                 st_muEnergy.push_back(mue_[imu])
                 st_isTightMuon.push_back(bool(mutightid_[imu]))
+                st_muCharge.push_back(muCharge_[imu])
                 #st_muIso.push_back(muIso_[imu])
             if debug_:print 'nMu: ',len(pass_mu_index)
 
