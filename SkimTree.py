@@ -749,7 +749,7 @@ def runbbdm(txtfile):
                 st_muPy.push_back(mupy_[imu])
                 st_muPz.push_back(mupz_[imu])
                 st_muEnergy.push_back(mue_[imu])
-                st_isTightMuon.push_back(bool(mutightid_[imu]))
+                st_isTightMuon.push_back(bool(mutightid_[imu]) and muisotight[imu])
                 st_muCharge.push_back(muCharge_[imu])
                 #st_muIso.push_back(muIso_[imu])
             if debug_:print 'nMu: ',len(pass_mu_index)
