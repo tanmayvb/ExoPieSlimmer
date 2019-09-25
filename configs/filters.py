@@ -12,9 +12,10 @@ filters2017=["Flag_goodVertices",
              "Flag_HBHENoiseIsoFilter",
              "Flag_EcalDeadCellTriggerPrimitiveFilter",
              "Flag_BadPFMuonFilter",
-             "Flag_eeBadScFilter",
-             "ecalBadCalibReducedMINIAODFilter"
+             "Flag_eeBadScFilter"
              ]
+             #"ecalBadCalibReducedMINIAODFilter"
+             #]
 filters2018=["Flag_goodVertices",
              "Flag_globalSuperTightHalo2016Filter",
              "Flag_HBHENoiseFilter",
