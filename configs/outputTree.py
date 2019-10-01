@@ -131,9 +131,10 @@ st_tau_dm              = ROOT.std.vector('bool')()
 
 st_nTau_DRBased_EleMuVeto               = array( 'L', [ 0 ] )
 st_nTau_discBased_looseElelooseMuVeto   = array( 'L', [ 0 ] )
-st_nTau_discBased_looseEleTightMuVeto   = array( 'L', [ 0 ] )
+st_nTau_discBased_looseEletightMuVeto   = array( 'L', [ 0 ] )
 st_nTau_discBased_mediumElelooseMuVeto  = array( 'L', [ 0 ] )
-st_nTau_discBased_TightElelooseMuVeto   = array( 'L', [ 0 ] )
+st_nTau_discBased_tightElelooseMuVeto   = array( 'L', [ 0 ] )
+st_nTau_discBased_tightEletightMuVeto   = array( 'L', [ 0 ] )
 
 mcweight               = array( 'f', [ 0 ] )
 st_pu_nTrueInt         = array( 'f', [ 0 ] ) #ROOT.std.vector('std::vector<float>')()
