@@ -18,7 +18,7 @@ from multiprocessing import Process
 import multiprocessing as mp
 
 
-isCondor =True
+isCondor =False
 
 ## user packages
 ## in local dir
@@ -111,7 +111,7 @@ def whichsample(filename):
         sample = 6
     elif "WJetsToLNu_HT" in filename:
         sample = 24
-    elif "ZJetsToNuNu_HT" in filename:
+    elif "ZJetsToNuNu_HT" in filename or "DYJetsToLL" in filename:
         sample = 23
     return sample
 
@@ -262,10 +262,9 @@ def runbbdm(txtfile):
     #outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
     outTree.Branch( 'st_nTau_DRBased_EleMuVeto',st_nTau_DRBased_EleMuVeto,'st_nTau_DRBased_EleMuVeto/L')
     outTree.Branch( 'st_nTau_discBased_looseElelooseMuVeto',st_nTau_discBased_looseElelooseMuVeto,'st_nTau_discBased_looseElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_looseEletightMuVeto',st_nTau_discBased_looseEletightMuVeto,'st_nTau_discBased_looseEletightMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_looseEleTightMuVeto',st_nTau_discBased_looseEleTightMuVeto,'st_nTau_discBased_looseEleTightMuVeto/L')
     outTree.Branch( 'st_nTau_discBased_mediumElelooseMuVeto',st_nTau_discBased_mediumElelooseMuVeto,'st_nTau_discBased_mediumElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_tightElelooseMuVeto',st_nTau_discBased_tightElelooseMuVeto,'st_nTau_discBased_tightElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_tightEletightMuVeto',st_nTau_discBased_tightEletightMuVeto,'st_nTau_discBased_tightEletightMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_TightEleTightMuVeto',st_nTau_discBased_TightEleTightMuVeto,'st_nTau_discBased_TightEleTightMuVeto/L')
 
     '''
     outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon)
@@ -569,13 +568,11 @@ def runbbdm(txtfile):
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstTightMuon[itau]) ) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstMediumElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstTightMuon[itau])) for itau in range(nTau_)]
 
             tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto)
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto)
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto)
             tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto)
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto)
             '''
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto',tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto
@@ -759,10 +756,9 @@ def runbbdm(txtfile):
 
             st_nTau_DRBased_EleMuVeto[0] = len(pass_tau_index_cleaned_DRBased)
             st_nTau_discBased_looseElelooseMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index)
-            st_nTau_discBased_looseEletightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index)
+            st_nTau_discBased_looseEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index)
             st_nTau_discBased_mediumElelooseMuVeto[0]   = len(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index)
-            st_nTau_discBased_tightElelooseMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
-            st_nTau_discBased_tightEletightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto_index)
+            st_nTau_discBased_TightEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
             if debug_:print 'nTau: ',len(pass_tau_index_cleaned_DRBased)
             #print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
             '''
@@ -792,10 +788,12 @@ def runbbdm(txtfile):
 
             #st_nGenPar[0] =  nGenPar_
             genpar_pt = GenPtProd.GenPtProducer(samplename, nGenPar_, genParId_, genMomParId_, genParSt_,genpx_,genpy_)
+            print "genpar_pt",len(genpar_pt)
             for i in range(len(genpar_pt)):
                 st_genParPt.push_back(genpar_pt[i])
+                print 'genpar_pt',genpar_pt[i]
             st_genParSample.push_back(samplename)
-
+            #print 'samplename',samplename
             # for igp in range(nGenPar_):
             #     st_genParId.push_back(int(genParId_[igp]))
             #     st_genMomParId.push_back(int(genMomParId_[igp]))
