@@ -33,7 +33,7 @@ def GenPtProducer(sample,nGenPar, genParId, genMomParId, genParSt,st_genParPx,st
             status = genParSt[ig]
 
 
-            if ( (abs(PID) != 12) &  (abs(PID) != 14) &  (abs(PID) != 16) ) : continue
+            if ( (abs(PID) != 12) &  (abs(PID) != 14) &  (abs(PID) != 16) ) and ( (abs(PID) != 11) &  (abs(PID) != 13) &  (abs(PID) != 15) ): continue
             if ( status != 1 ) : continue
             if ( (momPID != 23) & (momPID != PID) ) : continue
             goodLepID.append(ig)

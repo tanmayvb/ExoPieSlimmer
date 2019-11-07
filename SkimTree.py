@@ -111,7 +111,7 @@ def whichsample(filename):
         sample = 6
     elif "WJetsToLNu_HT" in filename:
         sample = 24
-    elif "ZJetsToNuNu_HT" in filename:
+    elif "ZJetsToNuNu_HT" in filename or "DYJetsToLL" in filename:
         sample = 23
     return sample
 
