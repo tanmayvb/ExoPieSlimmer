@@ -18,7 +18,7 @@ from multiprocessing import Process
 import multiprocessing as mp
 
 
-isCondor =True
+isCondor =False
 
 ## user packages
 ## in local dir
@@ -27,7 +27,7 @@ import  triggers as trig
 import variables as branches
 import filters as filters
 import genPtProducer as GenPtProd
-
+from TheaCorrection import TheaCorrection 
 ## from commonutils
 if isCondor:sys.path.append('ExoPieUtils/commonutils/')
 else:sys.path.append('../ExoPieUtils/commonutils/')
@@ -226,6 +226,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_fjetProbWvsQCD',st_fjetProbWvsQCD)
     outTree.Branch( 'st_fjetProbZHbbvsQCD',st_fjetProbZHbbvsQCD)
     outTree.Branch( 'st_fjetSDMass',st_fjetSDMass)
+    outTree.Branch( 'st_fjetSDMassCorrFact',st_fjetSDMassCorrFact)
     outTree.Branch( 'st_fjetN2b1',st_fjetN2b1)
     outTree.Branch( 'st_fjetN2b2',st_fjetN2b2)
     outTree.Branch( 'st_fjetCHSPRMass',st_fjetCHSPRMass)
@@ -262,10 +263,9 @@ def runbbdm(txtfile):
     #outTree.Branch( 'st_HPSTau_n', st_HPSTau_n, 'st_HPSTau_n/L')
     outTree.Branch( 'st_nTau_DRBased_EleMuVeto',st_nTau_DRBased_EleMuVeto,'st_nTau_DRBased_EleMuVeto/L')
     outTree.Branch( 'st_nTau_discBased_looseElelooseMuVeto',st_nTau_discBased_looseElelooseMuVeto,'st_nTau_discBased_looseElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_looseEletightMuVeto',st_nTau_discBased_looseEletightMuVeto,'st_nTau_discBased_looseEletightMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_looseEleTightMuVeto',st_nTau_discBased_looseEleTightMuVeto,'st_nTau_discBased_looseEleTightMuVeto/L')
     outTree.Branch( 'st_nTau_discBased_mediumElelooseMuVeto',st_nTau_discBased_mediumElelooseMuVeto,'st_nTau_discBased_mediumElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_tightElelooseMuVeto',st_nTau_discBased_tightElelooseMuVeto,'st_nTau_discBased_tightElelooseMuVeto/L')
-    outTree.Branch( 'st_nTau_discBased_tightEletightMuVeto',st_nTau_discBased_tightEletightMuVeto,'st_nTau_discBased_tightEletightMuVeto/L')
+    outTree.Branch( 'st_nTau_discBased_TightEleTightMuVeto',st_nTau_discBased_TightEleTightMuVeto,'st_nTau_discBased_TightEleTightMuVeto/L')
 
     '''
     outTree.Branch( 'st_Taudisc_againstLooseMuon', st_Taudisc_againstLooseMuon)
@@ -442,7 +442,7 @@ def runbbdm(txtfile):
 
             if filterdecision == False: continue
 
-
+            if isData:print 'isData',isData
 
             # ------------------------------------------------------
             ## PFMET Selection
@@ -513,7 +513,15 @@ def runbbdm(txtfile):
             jetCleanAgainstEle = []
             jetCleanAgainstMu = []
             pass_jet_index_cleaned = []
-
+            #print 'run,lumi,event',run,lumi,event
+            #print 'checking information'
+            #print 'nak4jet_',nak4jet_
+            #print 'raw value','  :  ','ak4pt',ak4pt
+            #print 'raw value','  :  ','ak4eta',ak4eta
+            #print 'raw value','  :  ','ak4phi',ak4phi
+            #print 'raw value','  :   ','ak4PassID_',ak4PassID_
+            #print 'step1:    ak4_pt30_eta4p5_IDT',ak4_pt30_eta4p5_IDT
+  
 
             if len(ak4_pt30_eta4p5_IDT) > 0:
                 DRCut = 0.4
@@ -522,6 +530,9 @@ def runbbdm(txtfile):
                 jetCleaned = boolutil.logical_AND_List3(ak4_pt30_eta4p5_IDT,jetCleanAgainstEle, jetCleanAgainstMu)
                 pass_jet_index_cleaned = boolutil.WhereIsTrue(jetCleaned)
                 if debug_:print "pass_jet_index_cleaned = ", pass_jet_index_cleaned,"nJets= ",len(ak4px_)
+
+
+            #print 'step2:  pass_jet_index_cleaned', pass_jet_index_cleaned
 
             '''
             ******      *******   *****   *******
@@ -534,7 +545,8 @@ def runbbdm(txtfile):
             fatjetpt = [getPt(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
             fatjeteta = [getEta(fatjetPx[ij], fatjetPy[ij], fatjetPz[ij]) for ij in range(fatnJet)]
             fatjetphi = [getPhi(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
-
+            SDMassCorrFact = [TheaCorrection(fatjetpt[ij],fatjeteta[ij]) for ij in range(fatnJet)]
+            print 'SDMassCorrFact',SDMassCorrFact 
             fatjet_pt200_eta2p5_IDT  = [ ( (fatjetpt[ij] > 200.0) and (abs(fatjeteta[ij]) < 2.5) and (fatjetPassID[ij] ) ) for ij in range(fatnJet)]
 
             ##--- fat jet cleaning
@@ -569,13 +581,11 @@ def runbbdm(txtfile):
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstLooseElectron[itau]) and (Taudisc_againstTightMuon[itau]) ) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstMediumElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
             tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstLooseMuon[itau])) for itau in range(nTau_)]
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto  = [ ( (taupt[itau] > 18.0) and (abs(taueta[itau]) < 2.3) and (tau_isLoose_[itau]) and (tau_dm_[itau]) and (Taudisc_againstTightElectron[itau]) and (Taudisc_againstTightMuon[itau])) for itau in range(nTau_)]
 
             tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto)
             tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto)
             tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto)
             tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto)
-            tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto_index  = boolutil.WhereIsTrue(tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto)
             '''
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto', tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto
             print 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index', tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index, 'tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto',tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto
@@ -644,6 +654,7 @@ def runbbdm(txtfile):
             st_fjetProbWvsQCD.clear()
             st_fjetProbZHbbvsQCD.clear()
             st_fjetSDMass.clear()
+            st_fjetSDMassCorrFact.clear()
             st_fjetN2b1.clear()
             st_fjetN2b2.clear()
             st_fjetCHSPRMass.clear()
@@ -709,6 +720,14 @@ def runbbdm(txtfile):
                 st_THINjetEleEF.push_back(ak4EleEF_[ithinjet])
                 st_THINjetMuoEF.push_back(ak4MuEF_[ithinjet])
                 st_THINjetCorrUnc.push_back(ak4JEC_[ithinjet])
+
+
+                #print 'ak4px_',ak4px_[ithinjet],'ak4py_',ak4py_[ithinjet],'ak4pz_',ak4pz_[ithinjet]
+                #print 'ak4e_',ak4e_[ithinjet]
+                #print 'ak4deepcsv_',ak4deepcsv_[ithinjet]
+            #print 'pass_jet_index_cleaned',pass_jet_index_cleaned
+            #print 'st_THINjetDeepCSV',len(st_THINjetDeepCSV)
+            #print 'st_THINnJet',st_THINnJet
             if debug_:print 'njets: ',len(pass_jet_index_cleaned)
 
             st_nfjet[0] = len(pass_fatjet_index_cleaned)
@@ -729,6 +748,7 @@ def runbbdm(txtfile):
                 st_fjetProbWvsQCD.push_back(fatjet_prob_WvsQCD[ifjet])
                 st_fjetProbZHbbvsQCD.push_back(fatjet_prob_ZHbbvsQCD[ifjet])
                 st_fjetSDMass.push_back(fatjetSDmass[ifjet])
+                st_fjetSDMassCorrFact.push_back(SDMassCorrFact[ifjet])
                 st_fjetN2b1.push_back(fatN2_Beta1_[ifjet])
                 st_fjetN2b2.push_back(fatN2_Beta2_[ifjet])
                 st_fjetCHSPRMass.push_back(fatjetCHSPRmassL2L3Corr[ifjet])
@@ -759,10 +779,9 @@ def runbbdm(txtfile):
 
             st_nTau_DRBased_EleMuVeto[0] = len(pass_tau_index_cleaned_DRBased)
             st_nTau_discBased_looseElelooseMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_looseMuVeto_index)
-            st_nTau_discBased_looseEletightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index)
+            st_nTau_discBased_looseEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_looseEleVeto_tightMuVeto_index)
             st_nTau_discBased_mediumElelooseMuVeto[0]   = len(tau_eta2p3_iDLdm_pt18_mediumEleVeto_looseMuVeto_index)
-            st_nTau_discBased_tightElelooseMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
-            st_nTau_discBased_tightEletightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_tightMuVeto_index)
+            st_nTau_discBased_TightEleTightMuVeto[0]    = len(tau_eta2p3_iDLdm_pt18_tightEleVeto_looseMuVeto_index)
             if debug_:print 'nTau: ',len(pass_tau_index_cleaned_DRBased)
             #print 'nTau: ',len(pass_tau_index_cleaned_DRBased),'event',event
             '''
