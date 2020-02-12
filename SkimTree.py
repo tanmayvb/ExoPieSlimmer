@@ -18,7 +18,7 @@ from multiprocessing import Process
 import multiprocessing as mp
 
 
-isCondor =False
+isCondor = False
 
 ## user packages
 ## in local dir
@@ -27,7 +27,7 @@ import  triggers as trig
 import variables as branches
 import filters as filters
 import genPtProducer as GenPtProd
-from TheaCorrection import TheaCorrection 
+from TheaCorrection import TheaCorrection
 ## from commonutils
 if isCondor:sys.path.append('ExoPieUtils/commonutils/')
 else:sys.path.append('../ExoPieUtils/commonutils/')
@@ -203,10 +203,12 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_THINjetCHadEF',st_THINjetCHadEF )
 
     outTree.Branch( 'st_THINjetCEmEF',st_THINjetCEmEF )
-    outTree.Branch( 'st_THINjetPhoEF',st_THINjetPhoEF )
-    outTree.Branch( 'st_THINjetEleEF',st_THINjetEleEF )
-    outTree.Branch( 'st_THINjetMuoEF',st_THINjetMuoEF )
+    # outTree.Branch( 'st_THINjetPhoEF',st_THINjetPhoEF )
+    # outTree.Branch( 'st_THINjetEleEF',st_THINjetEleEF )
+    # outTree.Branch( 'st_THINjetMuoEF',st_THINjetMuoEF )
     outTree.Branch('st_THINjetCorrUnc', st_THINjetCorrUnc)
+    outTree.Branch('st_THINbRegNNResolution', st_THINbRegNNResolution)
+    outTree.Branch('st_THINbRegNNCorr',  st_THINbRegNNCorr)
 
 
     outTree.Branch( 'st_nfjet',st_nfjet,'st_nfjet/L')
@@ -295,7 +297,7 @@ def runbbdm(txtfile):
     outTree.Branch( 'st_genParPt', st_genParPt, )
     outTree.Branch( 'st_genParSample', st_genParSample )
 
-   
+
     outTree.Branch( 'WenuRecoil', WenuRecoil, 'WenuRecoil/F')
     outTree.Branch( 'Wenumass', Wenumass, 'Wenumass/F')
     outTree.Branch( 'WenuPhi', WenuPhi, 'WenuPhi/F')
@@ -314,7 +316,7 @@ def runbbdm(txtfile):
     '''
     outTree.Branch( 'GammaRecoil', GammaRecoil, 'GammaRecoil/F')
     outTree.Branch( 'GammaPhi', GammaPhi, 'GammaPhi/F')
-    ''' 
+    '''
 
     # trigger status branches
     outTree.Branch( 'st_eletrigdecision', st_eletrigdecision , 'st_eletrigdecision/O')
@@ -345,9 +347,9 @@ def runbbdm(txtfile):
                        df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byMediumIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byTightIsolationMVArun2017v2DBoldDMwLT2017,\
                        df.disc_againstMuonLoose3,df.disc_againstMuonTight3,df.disc_againstElectronLooseMVA6,df.disc_againstElectronMediumMVA6,df.disc_againstElectronTightMVA6,\
                        df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
-                       df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
+                       df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,df.THINbRegNNResolution,df.THINbRegNNCorr,\
                        df.THINjetPassIDLoose,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
-                       df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV, \
+                       df.THINjetCEmEF,df.THINjetCorrUncUp,df.THINjetNPV, \
                        df.FATnJet, df.FATjetPx, df.FATjetPy, df.FATjetPz, df.FATjetEnergy, df.FATjetPassIDLoose,\
                        df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                        df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
@@ -363,9 +365,9 @@ def runbbdm(txtfile):
                        df.HPSTau_n,df.HPSTau_Px,df.HPSTau_Py,df.HPSTau_Pz,df.HPSTau_Energy,df.disc_decayModeFinding,df.disc_byLooseIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byMediumIsolationMVArun2017v2DBoldDMwLT2017,df.disc_byTightIsolationMVArun2017v2DBoldDMwLT2017,\
                        df.disc_againstMuonLoose3,df.disc_againstMuonTight3,df.disc_againstElectronLooseMVA6,df.disc_againstElectronMediumMVA6,df.disc_againstElectronTightMVA6,\
                        df.nGenPar,df.genParId,df.genMomParId,df.genParSt,df.genParPx,df.genParPy,df.genParPz,df.genParE,\
-                       df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,\
+                       df.THINnJet,df.THINjetPx,df.THINjetPy,df.THINjetPz,df.THINjetEnergy,df.THINbRegNNResolution,df.THINbRegNNCorr,\
                        df.THINjetPassIDTight,df.THINjetDeepCSV_b,df.THINjetHadronFlavor,df.THINjetNHadEF,df.THINjetCHadEF,\
-                       df.THINjetCEmEF,df.THINjetPhoEF,df.THINjetEleEF,df.THINjetMuoEF,df.THINjetCorrUncUp,df.THINjetNPV, \
+                       df.THINjetCEmEF,df.THINjetCorrUncUp,df.THINjetNPV, \
                        df.FATnJet, df.FATjetPx, df.FATjetPy, df.FATjetPz, df.FATjetEnergy, df.FATjetPassIDTight,\
                        df.FATjet_DoubleSV, df.FATjet_probQCDb, df.FATjet_probHbb, df.FATjet_probQCDc, df.FATjet_probHcc, df.FATjet_probHbbc,\
                        df.FATjet_prob_bbvsLight, df.FATjet_prob_ccvsLight, df.FATjet_prob_TvsQCD, df.FATjet_prob_WvsQCD, df.FATjet_prob_ZHbbvsQCD,\
@@ -380,9 +382,9 @@ def runbbdm(txtfile):
                 nTau_,tau_px_,tau_py_,tau_pz_,tau_e_,tau_dm_,tau_isLoose_,tau_isoMedium_,tau_isoTight_,\
                 Taudisc_againstLooseMuon,Taudisc_againstTightMuon,Taudisc_againstLooseElectron,Taudisc_againstMediumElectron,Taudisc_againstTightElectron,\
                 nGenPar_,genParId_,genMomParId_,genParSt_,genpx_,genpy_,genpz_,gene_,\
-                nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,\
+                nak4jet_,ak4px_,ak4py_,ak4pz_,ak4e_,ak4bRegNNResolution,ak4bRegNNCorr,\
                 ak4PassID_,ak4deepcsv_,ak4flavor_,ak4NHEF_,ak4CHEF_,\
-                ak4CEmEF_,ak4PhEF_,ak4EleEF_,ak4MuEF_, ak4JEC_, ak4NPV_,\
+                ak4CEmEF_,ak4JEC_, ak4NPV_,\
                 fatnJet, fatjetPx, fatjetPy, fatjetPz, fatjetEnergy,fatjetPassID,\
                 fatjet_DoubleSV, fatjet_probQCDb, fatjet_probHbb, fatjet_probQCDc, fatjet_probHcc, fatjet_probHbbc,\
                 fatjet_prob_bbvsLight, fatjet_prob_ccvsLight, fatjet_prob_TvsQCD, fatjet_prob_WvsQCD, fatjet_prob_ZHbbvsQCD,\
@@ -521,7 +523,7 @@ def runbbdm(txtfile):
             #print 'raw value','  :  ','ak4phi',ak4phi
             #print 'raw value','  :   ','ak4PassID_',ak4PassID_
             #print 'step1:    ak4_pt30_eta4p5_IDT',ak4_pt30_eta4p5_IDT
-  
+
 
             if len(ak4_pt30_eta4p5_IDT) > 0:
                 DRCut = 0.4
@@ -546,7 +548,7 @@ def runbbdm(txtfile):
             fatjeteta = [getEta(fatjetPx[ij], fatjetPy[ij], fatjetPz[ij]) for ij in range(fatnJet)]
             fatjetphi = [getPhi(fatjetPx[ij], fatjetPy[ij]) for ij in range(fatnJet)]
             SDMassCorrFact = [TheaCorrection(fatjetpt[ij],fatjeteta[ij]) for ij in range(fatnJet)]
-            print 'SDMassCorrFact',SDMassCorrFact 
+            #print 'SDMassCorrFact',SDMassCorrFact
             fatjet_pt200_eta2p5_IDT  = [ ( (fatjetpt[ij] > 200.0) and (abs(fatjeteta[ij]) < 2.5) and (fatjetPassID[ij] ) ) for ij in range(fatnJet)]
 
             ##--- fat jet cleaning
@@ -596,6 +598,7 @@ def runbbdm(txtfile):
             tauCleanAgainstMu = []
             pass_tau_index_cleaned_DRBased = []
             if len(tau_eta2p3_iDLdm_pt18)>0:
+                DRCut = 0.4
                 tauCleanAgainstEle = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, ele_pt10_eta2p5_looseID,         taueta, eleeta, tauphi, elephi, DRCut)
                 tauCleanAgainstMu  = anautil.jetcleaning(tau_eta2p3_iDLdm_pt18, mu_pt10_eta2p4_looseID_looseISO, taueta, mueta,  tauphi, muphi,  DRCut)
                 tauCleaned = boolutil.logical_AND_List3(tau_eta2p3_iDLdm_pt18 , tauCleanAgainstEle, tauCleanAgainstMu)
@@ -631,11 +634,12 @@ def runbbdm(txtfile):
             st_THINjetCHadEF.clear()
 
             st_THINjetCEmEF.clear()
-            st_THINjetPhoEF.clear()
-            st_THINjetEleEF.clear()
-            st_THINjetMuoEF.clear()
+            # st_THINjetPhoEF.clear()
+            # st_THINjetEleEF.clear()
+            # st_THINjetMuoEF.clear()
             st_THINjetCorrUnc.clear()
-
+            st_THINbRegNNResolution.clear()
+            st_THINbRegNNCorr.clear()
 
 
             st_fjetPx.clear()
@@ -716,11 +720,12 @@ def runbbdm(txtfile):
                 st_THINjetCHadEF.push_back(ak4CHEF_[ithinjet])
 
                 st_THINjetCEmEF.push_back(ak4CEmEF_[ithinjet])
-                st_THINjetPhoEF.push_back(ak4PhEF_[ithinjet])
-                st_THINjetEleEF.push_back(ak4EleEF_[ithinjet])
-                st_THINjetMuoEF.push_back(ak4MuEF_[ithinjet])
+                # st_THINjetPhoEF.push_back(ak4PhEF_[ithinjet])
+                # st_THINjetEleEF.push_back(ak4EleEF_[ithinjet])
+                # st_THINjetMuoEF.push_back(ak4MuEF_[ithinjet])
                 st_THINjetCorrUnc.push_back(ak4JEC_[ithinjet])
-
+                st_THINbRegNNResolution.push_back(ak4bRegNNResolution[ithinjet])
+                st_THINbRegNNCorr.push_back(ak4bRegNNCorr[ithinjet])
 
                 #print 'ak4px_',ak4px_[ithinjet],'ak4py_',ak4py_[ithinjet],'ak4pz_',ak4pz_[ithinjet]
                 #print 'ak4e_',ak4e_[ithinjet]
