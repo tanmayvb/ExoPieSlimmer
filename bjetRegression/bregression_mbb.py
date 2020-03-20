@@ -76,8 +76,8 @@ def Analyze():
     DCSVMWP=0.6324
     NEntries = skimmedTree.GetEntries()
 
-    h_Mbb                     =TH1F('h_Mbb_',  'h_Mbb_',  40,20.,200.)
-    h_regMbb                  =TH1F('h_regMbb_',  'h_regMbb_',  40,20.,200.)
+    h_Mbb                     =TH1F('h_Mbb_',  'h_Mbb_',  25,100.,150.)
+    h_regMbb                  =TH1F('h_regMbb_',  'h_regMbb_',  25,100.,150.)
 
     h_jet1_pT                 =TH1F('h_jet1_pT_',  'h_jet1_pT_',  50,0.0,1500.)
     h_jet2_pT                 =TH1F('h_jet2_pT',  'h_jet2_pT',  50,0.0,1500.)
@@ -243,12 +243,12 @@ def Analyze():
             addJet=(j1p4+j2p4)
             if(addJet.M() > 100 and addJet.M()<150):
                 h_Mbb.Fill(addJet.M())
-                print "Mass= ", addJet.M()
-                j1p4Corr=jetP4Corr[0]
-                h_regjet1_pT.Fill(j1p4Corr.Pt())
-                j2p4Corr=jetP4Corr[1]
-                h_regjet2_pT.Fill(j2p4Corr.Pt())
-                addJetCorr=(j1p4Corr+j2p4Corr)
+            j1p4Corr=jetP4Corr[0]
+            h_regjet1_pT.Fill(j1p4Corr.Pt())
+            j2p4Corr=jetP4Corr[1]
+            h_regjet2_pT.Fill(j2p4Corr.Pt())
+            addJetCorr=(j1p4Corr+j2p4Corr)
+            if(addJet.M() > 100 and addJet.M()<150):
                 h_regMbb.Fill(addJetCorr.M())
       
     f1 = TF1("f1", "gaus",  100, 150);
