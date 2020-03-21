@@ -248,7 +248,7 @@ def Analyze():
             j2p4Corr=jetP4Corr[1]
             h_regjet2_pT.Fill(j2p4Corr.Pt())
             addJetCorr=(j1p4Corr+j2p4Corr)
-            if(addJet.M() > 100 and addJet.M()<150):
+            if(addJetCorr.M() > 100 and addJetCorr.M()<150):
                 h_regMbb.Fill(addJetCorr.M())
       
     f1 = TF1("f1", "gaus",  100, 150);
