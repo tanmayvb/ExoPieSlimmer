@@ -10,13 +10,16 @@ import sample_xsec_2017 as crsec
 def Analyze():
 
 	path = "/eos/cms/store/group/phys_exotica/monoHiggs/monoHbb/skimmedFiles/V0_fixedjetID_bjetReg/"
-
+	outfilename= 'Outputplot.root'
+	outfile = TFile(outfilename,'RECREATE')
+	txtfile = open("copy.txt", "w")
 	filename = list()        
 	with open ("sigfile.txt", "r") as myfile:
 		for line in myfile:
 			filename.append(line.strip()) 
 
 	sigmass=array('d',[300.,400.,500.,600.,1000.,1200.,1400.,1600.])
+	signal_entry=TH1F('signal_entry', 'signal_entry_eachbin', len(filename),0,len(filename))
 	h_Mbb=[]
 	h_regMbb=[]
 	h_higgs_pT=[]
@@ -47,7 +50,7 @@ def Analyze():
 		openf = TFile(path+filename[i], "read")
 		skimmedTree = openf.Get("outTree")
 		NEntries = skimmedTree.GetEntries()
-		#print filename[i], NEntries
+		print filename[i], NEntries
 		Entry.append(NEntries)
 
 		for ievent in range(NEntries):
@@ -203,7 +206,14 @@ def Analyze():
 				if(addJetCorr.M() > 100 and addJetCorr.M()<150):
 					h_reghiggs_pT[i].Fill(Corrhiggs_pt)
 					h_regMbb[i].Fill(addJetCorr.M())
-
+	outfile.cd()
+	for i in range(len(filename)):
+		h_Mbb[i].Write()
+		h_higgs_pT[i].Write()
+		h_regMbb[i].Write()
+		h_reghiggs_pT[i].Write()
+		signal_entry.SetBinContent(i,Entry[i])
+	signal_entry.Write()
 # BackGround Samples and selections
 	bkgfilename = list()
 	with open ("bkgfile.txt", "r") as mybkgfile:
@@ -212,63 +222,97 @@ def Analyze():
 
 	L=41000.0
 
-	h_bkgMbb= TH1F('h_bkgmbb',  'Mbb before',  25,100.,150.)
-	h_bkgMbbx= TH1F('h_bkgmbbx',  'Mbb beforex',  25,100.,150.)
-	h_bkgregMbb= TH1F('h_bkgregMbb', 'Mbb after',  25,100.,150.)
-	h_bkgregMbbx= TH1F('h_bkgregMbbx', 'Mbb after x',  25,100.,150.)
-	Count_bkgregMbb=Count_bkgMbb=0
+	h_bkgMbb= []
+	h_bkgregMbb= []
 
+	h_bkgMbbx=[]
+        h_bkgregMbbx=[]
+        for i in range (len(bkgfilename)):
+		name1='Mbb_bkg_with_mass_window_'+str(i)
+                title1= 'hist_bkgMbb_with_mass_window_'+str(bkgfilename[i].replace('.root','_file'))
+		mbb1= TH1F(name1, title1, 25,100.,150.)
+                h_bkgMbb.append(mbb1)
+
+                namex= 'Mbb_bkg_without_mass_window_'+str(i)
+                titlex= 'hist_bkgMbb_without_mass_window'+str(bkgfilename[i].replace('.root','_file'))
+                mbbxx= TH1F(namex,  titlex,  120,20.,1000.)
+                h_bkgMbbx.append(mbbxx)
+
+		name2='regMbb_bkg_with_mass_window_'+str(i)
+                title2= 'hist_bkgMbb_with_mass_window_'+str(bkgfilename[i].replace('.root','_file'))
+                mbb2= TH1F(name2, title2, 25,100.,150.)
+                h_bkgregMbb.append(mbb2)
+
+                namey= 'regMbb_bkg_without_mass_window_'+str(i)
+                titley= 'hist_bkgregMbb_without_mass_window_'+str(bkgfilename[i].replace('.root','_file'))
+                mbbyy= TH1F(namey,  titley,  120,20.,1000.)
+                h_bkgregMbbx.append(mbbyy)
+
+	#h_bkgMbbx= TH1F('h_bkgmbbx',  'Mbb beforex',  50,0.,1500.)
+	#h_bkgregMbbx= TH1F('h_bkgregMbbx', 'Mbb after x',  50,0.,1500.)
+
+	Count_bkgregMbb=Count_bkgMbb=0
 	for i in range(len(bkgfilename)):
 		bkgopenf = TFile(path+bkgfilename[i], "read")
+
 		h_total_mcweight_bkg = bkgopenf.Get("h_total_mcweight")
+		h_total_mcweight_bkgx=h_total_mcweight_bkg.Clone()
+		weight_name=h_total_mcweight_bkg.GetName()
+		weight_name1=weight_name+'_'+str(i)
+		h_total_mcweight_bkgx.SetName(weight_name1)
+		weight_title=bkgfilename[i].replace('.root','_file')
+		h_total_mcweight_bkgx.SetTitle(weight_title)
+		outfile.cd()
+		h_total_mcweight_bkgx.Write()
 		eventsbkg = h_total_mcweight_bkg.Integral()
+
 		bkgskimmedTree = bkgopenf.Get("outTree")
 		bkgNEntries = bkgskimmedTree.GetEntries()
-		print bkgfilename[i], bkgNEntries
+		print bkgfilename[i], eventsbkg, ' ', bkgNEntries
 		print "Next Check \n"
 		for ievent in range(bkgNEntries):
 			bkgskimmedTree.GetEntry(ievent)
 		
-			nTHINJets              = skimmedTree.__getattr__('st_THINnJet')
-			THINJetsPx             = skimmedTree.__getattr__('st_THINjetPx')
-			THINJetsPy             = skimmedTree.__getattr__('st_THINjetPy')
-			THINJetsPz             = skimmedTree.__getattr__('st_THINjetPz')
-			THINJetsEnergy         = skimmedTree.__getattr__('st_THINjetEnergy')
-			thinbRegNNCorr         = skimmedTree.__getattr__('st_THINbRegNNCorr')
-			thinbRegNNResolution   = skimmedTree.__getattr__('st_THINbRegNNResolution')
-			thinjetDeepCSV         =skimmedTree.__getattr__('st_THINjetDeepCSV')
+			nTHINJets              = bkgskimmedTree.__getattr__('st_THINnJet')
+			THINJetsPx             = bkgskimmedTree.__getattr__('st_THINjetPx')
+			THINJetsPy             = bkgskimmedTree.__getattr__('st_THINjetPy')
+			THINJetsPz             = bkgskimmedTree.__getattr__('st_THINjetPz')
+			THINJetsEnergy         = bkgskimmedTree.__getattr__('st_THINjetEnergy')
+			thinbRegNNCorr         = bkgskimmedTree.__getattr__('st_THINbRegNNCorr')
+			thinbRegNNResolution   = bkgskimmedTree.__getattr__('st_THINbRegNNResolution')
+			thinjetDeepCSV         = bkgskimmedTree.__getattr__('st_THINjetDeepCSV')
 
-			nfJets              = skimmedTree.__getattr__('st_nfjet')
-			fJetsPx             = skimmedTree.__getattr__('st_fjetPx')
-			fJetsPy             = skimmedTree.__getattr__('st_fjetPy')
-			fJetsPz             = skimmedTree.__getattr__('st_fjetPz')
-			fJetsEnergy         = skimmedTree.__getattr__('st_fjetEnergy')
+			nfJets              = bkgskimmedTree.__getattr__('st_nfjet')
+			fJetsPx             = bkgskimmedTree.__getattr__('st_fjetPx')
+			fJetsPy             = bkgskimmedTree.__getattr__('st_fjetPy')
+			fJetsPz             = bkgskimmedTree.__getattr__('st_fjetPz')
+			fJetsEnergy         = bkgskimmedTree.__getattr__('st_fjetEnergy')
 
-			nEle                   = skimmedTree.__getattr__('st_nEle') 
-			ElePx                  = skimmedTree.__getattr__('st_elePx') 
-			ElePy                  = skimmedTree.__getattr__('st_elePy') 
-			ElePz                  = skimmedTree.__getattr__('st_elePz') 
-			EleEnergy              = skimmedTree.__getattr__('st_eleEnergy') 
-			eleIsPassLoose         =skimmedTree.__getattr__('st_eleIsPassLoose')
-			eleIsPassTight         =skimmedTree.__getattr__('st_eleIsPassTight')
+			nEle                   = bkgskimmedTree.__getattr__('st_nEle') 
+			ElePx                  = bkgskimmedTree.__getattr__('st_elePx') 
+			ElePy                  = bkgskimmedTree.__getattr__('st_elePy') 
+			ElePz                  = bkgskimmedTree.__getattr__('st_elePz') 
+			EleEnergy              = bkgskimmedTree.__getattr__('st_eleEnergy') 
+			eleIsPassLoose         = bkgskimmedTree.__getattr__('st_eleIsPassLoose')
+			eleIsPassTight         = bkgskimmedTree.__getattr__('st_eleIsPassTight')
 
         
-			nMu                    = skimmedTree.__getattr__('st_nMu') 
-			muPx                   = skimmedTree.__getattr__('st_muPx') 
-			muPy                   = skimmedTree.__getattr__('st_muPy') 
-			muPz                   = skimmedTree.__getattr__('st_muPz') 
-			muEnergy               = skimmedTree.__getattr__('st_muEnergy') 
-			isTightMuon         =skimmedTree.__getattr__('st_isTightMuon')
+			nMu                    = bkgskimmedTree.__getattr__('st_nMu') 
+			muPx                   = bkgskimmedTree.__getattr__('st_muPx') 
+			muPy                   = bkgskimmedTree.__getattr__('st_muPy') 
+			muPz                   = bkgskimmedTree.__getattr__('st_muPz') 
+			muEnergy               = bkgskimmedTree.__getattr__('st_muEnergy') 
+			isTightMuon            = bkgskimmedTree.__getattr__('st_isTightMuon')
 
-			nPho                    = skimmedTree.__getattr__('st_nPho') 
-			phoPx                   = skimmedTree.__getattr__('st_phoPx') 
-			phoPy                   = skimmedTree.__getattr__('st_phoPy') 
-			phoPz                   = skimmedTree.__getattr__('st_phoPz') 
-			phoEnergy               = skimmedTree.__getattr__('st_phoEnergy') 
-			phoIsPassTight       =skimmedTree.__getattr__('st_phoIsPassTight')
+			nPho                    = bkgskimmedTree.__getattr__('st_nPho') 
+			phoPx                   = bkgskimmedTree.__getattr__('st_phoPx') 
+			phoPy                   = bkgskimmedTree.__getattr__('st_phoPy') 
+			phoPz                   = bkgskimmedTree.__getattr__('st_phoPz') 
+			phoEnergy               = bkgskimmedTree.__getattr__('st_phoEnergy') 
+			phoIsPassTight          = bkgskimmedTree.__getattr__('st_phoIsPassTight')
 
-			pfMet                      = skimmedTree.__getattr__('st_pfMetCorrPt')
-			pfMetPhi                      = skimmedTree.__getattr__('st_pfMetCorrPhi')
+			pfMet                   = bkgskimmedTree.__getattr__('st_pfMetCorrPt')
+			pfMetPhi                = bkgskimmedTree.__getattr__('st_pfMetCorrPhi')
 
 			#--------------------------------------------------
    	# Met Cut
@@ -368,28 +412,48 @@ def Analyze():
 				j2p4   = myBjetsP4[1]
 				addJet=(j1p4+j2p4)
 				higgs_pt=addJet.Pt()
-	    	#print "pt higgs", addJet.Pt() 
+				#print "pt higgs", addJet.Pt(), 'Mass =', addJet.M()
 				if(addJet.M() > 100 and addJet.M()<150):
-					h_bkgMbb.Fill(addJet.M())
-					h_bkgMbbx.Fill(addJet.M())
+					h_bkgMbb[i].Fill(addJet.M())
+				h_bkgMbbx[i].Fill(addJet.M())
 				j1p4Corr=jetP4Corr[0]
 				j2p4Corr=jetP4Corr[1]
 				addJetCorr=(j1p4Corr+j2p4Corr)
 				Corrhiggs_pt=addJetCorr.Pt()
 				if(addJetCorr.M() > 100 and addJetCorr.M()<150):
-					h_bkgregMbb.Fill(addJetCorr.M())
-					h_bkgregMbbx.Fill(addJetCorr.M())
+					h_bkgregMbb[i].Fill(addJetCorr.M())
+				h_bkgregMbbx[i].Fill(addJetCorr.M())
 
-		xsBkg = crsec.getXsec(bkgfilename[i])
-		print h_bkgMbb.Integral(), h_bkgregMbb.Integral() 
-		h_bkgMbb = h_bkgMbb*(L*xsBkg/eventsbkg)
-		h_bkgregMbb = h_bkgregMbb*(L*xsBkg/eventsbkg)
-		Count_bkgMbb+=h_bkgMbb.Integral()
-		Count_bkgregMbb+=h_bkgregMbb.Integral()
-		h_bkgMbb.Reset()
-		h_bkgregMbb.Reset()
+		#xsBkg = crsec.getXsec(bkgfilename[i])
+		txtfile.write(bkgfilename[i]+" "+str(h_bkgMbb[i].Integral()))
+		txtfile.write(" After ")
+		txtfile.write(str(h_bkgregMbb[i].Integral())+"\n")
+		#print 'Before scale \n'
+		#print  h_bkgMbb.Integral(), ' ', h_bkgregMbb.Integral() 
+		#scalefact=(41000*xsBkg)/eventsbkg
+		#print 'xsec= ', xsBkg, ' Nevt= ', eventsbkg, ' scalefact = ', scalefact
+		#h_bkgMbb.Scale(scalefact)
+		#h_bkgMbbx[i].Scale(scalefact)
+		#h_bkgMbb = h_bkgMbb*(L*xsBkg/eventsbkg)
+		#h_bkgMbbx[i]=h_bkgMbbx[i]*(L*xsBkg/eventsbkg)
 
+		#h_bkgregMbb = h_bkgregMbb*(L*xsBkg/eventsbkg)
+		#h_bkgregMbbx[i] = h_bkgregMbbx[i]*(L*xsBkg/eventsbkg)	
 
+		#Count_bkgMbb+=h_bkgMbb.Integral()
+		#Count_bkgregMbb+=h_bkgregMbb.Integral()
+		#h_bkgMbb.Reset()
+		#h_bkgregMbb.Reset()
+	for i in range(len(bkgfilename)):
+		outfile.cd()
+		h_bkgMbb[i].Write()	
+        	h_bkgMbbx[i].Write()
+		h_bkgregMbb[i].Write()
+        	h_bkgregMbbx[i].Write()
+	outfile.Close()
+        txtfile.close()
+	'''	
+	txtfile.write("\n  PunZi Significance \n")
 # Calculate and plot Punzi significance
 	punzi_Mbb, punzi_regMbb = array( 'd' ), array( 'd' )
 	for i in range (len(sigmass)):
@@ -398,12 +462,16 @@ def Analyze():
 		#punzi_Mbb[i]=norm_h_Mbb/NEntries	
 		effi_Mbb=norm_h_Mbb/Entry[i]
 		punzi_Mbb.append(effi_Mbb/(1+TMath.Sqrt(Count_bkgMbb)))
+		txtfile.write(str(effi_Mbb)+" Total Count Before "+str(Count_bkgMbb)+"\n")
 		#print "effi " 
 		#print(' i %i %f %f ' % (i,sigmass[i],punzi_Mbb[i]))
 		norm_h_regMbb =0.
 		norm_h_regMbb = h_regMbb[i].Integral()
 		effi_regMbb = norm_h_regMbb/Entry[i]
 		punzi_regMbb.append(effi_regMbb/(1+TMath.Sqrt(Count_bkgregMbb)))
+		txtfile.write(str(effi_regMbb)+" Total Count after "+str(Count_bkgregMbb)+"\n")
+		h_Mbb[i].Write()
+                h_regMbb[i].Write()
 		#print "effi after ", punzi_regMbb[i]
 
 	c1 = TCanvas( 'c1', 'Significance', 200, 10, 700, 500 )
@@ -413,7 +481,6 @@ def Analyze():
 	leg.SetFillStyle(0)
 	leg.SetTextFont(42)
 	leg.SetTextSize(0.035)
-
 	n=len(sigmass)
 	gr1 = TGraph( n, sigmass, punzi_Mbb )
 	gr1.SetLineColor( 2 )
@@ -421,10 +488,12 @@ def Analyze():
 	gr1.SetMarkerColor( 4 )
 	gr1.SetMarkerStyle( 21 )
 	gr1.SetTitle("Before regression")
+	gr1.SetName("graph1")
 	#gr1.SetDrawOption("AP");
 	#gr1.SetTitle( 'Punzi Significance' )
 	#gr1.GetXaxis().SetTitle( 'Signal Mass Point' )
 	#gr1.GetYaxis().SetTitle( 'Punzi' )
+	gr1.Write()
 
 	gr2 = TGraph( n, sigmass, punzi_regMbb )
 	gr2.SetLineColor( 3 )
@@ -432,9 +501,11 @@ def Analyze():
 	gr2.SetMarkerColor( 3 )
 	gr2.SetMarkerStyle( 24 )
 	gr2.SetTitle("After regression")
+	gr2.SetName("graph2")
 	#gr2.SetDrawOption("AP")
 	#gr1.Draw("ACP")
 	#gr2.Draw("ACP")
+	gr2.Write()
 
 	mg = TMultiGraph('mg', 'mg')
 	mg.Add(gr1, "LP")
@@ -443,8 +514,10 @@ def Analyze():
 	mg.Draw("ACP")
 	c1.BuildLegend()
 	c1.SaveAs("sig.pdf")
-
-
+	
+	outfile.Close()
+	txtfile.close()
+	'''
 def DeltaPhi(ph1, ph2):
     dphi=Phi_mpi_pi(ph1-ph2)
     return dphi
