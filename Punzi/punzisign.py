@@ -5,7 +5,7 @@ import sys, optparse
 from array import array
 import math
 import numpy as numpy_
-import sample_xsec_2017 as crsec 
+#import sample_xsec_2017 as crsec 
 
 def Analyze():
 
@@ -50,7 +50,7 @@ def Analyze():
 		openf = TFile(path+filename[i], "read")
 		skimmedTree = openf.Get("outTree")
 		NEntries = skimmedTree.GetEntries()
-		print filename[i], NEntries
+		#print filename[i], NEntries
 		Entry.append(NEntries)
 
 		for ievent in range(NEntries):
@@ -96,10 +96,11 @@ def Analyze():
 
 			pfMet                      = skimmedTree.__getattr__('st_pfMetCorrPt')
 			pfMetPhi                      = skimmedTree.__getattr__('st_pfMetCorrPhi')
-
+			tauid = skimmedTree.__getattr__('st_nTau_discBased_TightEleTightMuVeto')
 			#--------------------------------------------------
    	# Met Cut
 			if(pfMet<200.):continue
+			if(tauid>0.0):continue
 
    		#--------------------------------------------------
 		#Lepton Collection
@@ -216,7 +217,7 @@ def Analyze():
 	signal_entry.Write()
 # BackGround Samples and selections
 	bkgfilename = list()
-	with open ("bkgfile.txt", "r") as mybkgfile:
+	with open ("bkgfile3.txt", "r") as mybkgfile:
 		for line in mybkgfile:
 			bkgfilename.append(line.strip())
 
@@ -313,7 +314,8 @@ def Analyze():
 
 			pfMet                   = bkgskimmedTree.__getattr__('st_pfMetCorrPt')
 			pfMetPhi                = bkgskimmedTree.__getattr__('st_pfMetCorrPhi')
-
+			tauid = skimmedTree.__getattr__('st_nTau_discBased_TightEleTightMuVeto')
+			fjetProbHbb= skimmedTree.__getattr__('st_fjetProbHbb')
 			#--------------------------------------------------
    	# Met Cut
 			if(pfMet<200.):continue
@@ -349,32 +351,31 @@ def Analyze():
 				if isMatch(myMuosP4,temppho,0.4) or isMatch(myElesP4,temppho,0.4):continue
 				myPhos.append(ipho)
 				myPhosP4.append(temppho) 
-
-
-   #--------------------------------------------------
-        #thinAK4Jets
-			thinjetpassindex=[]
-			for ithinjet in range(nTHINJets):
-				tempthinjet = ROOT.TLorentzVector()
-				tempthinjet.SetPxPyPzE(THINJetsPx[ithinjet],THINJetsPy[ithinjet],THINJetsPz[ithinjet],THINJetsEnergy[ithinjet])
-        #if (bool(passThinJetLooseID[ithinjet])==False):continue
-				if (tempthinjet.Pt() < 30.0) or (abs(tempthinjet.Eta())>4.5):continue
-				if isMatch(myMuosP4,tempthinjet,0.4) or isMatch(myElesP4,tempthinjet,0.4) or isMatch(myPhosP4,tempthinjet,0.4):continue
-				thinjetpassindex.append(ithinjet)
-
-    #---------------------------------------------------- 
-
         
     #--------------------------------------------------
         #thinAK8Jets
 			fjetpassindex=[]
+			fjet=[]
 			for ifjet in range(nfJets):
 				tempfjet = ROOT.TLorentzVector()
 				tempfjet.SetPxPyPzE(fJetsPx[ifjet],fJetsPy[ifjet],fJetsPz[ifjet],fJetsEnergy[ifjet])
         #if (bool(passThinJetLooseID[ithinjet])==False):continue
-				if (tempfjet.Pt() < 200.0) or (abs(tempfjet.Eta())>2.4):continue
+				if (tempfjet.Pt() < 200.0) or (abs(tempfjet.Eta())>2.4 or fjetProbHbb<0.86):continue
 				if isMatch(myMuosP4,tempfjet,0.8) or isMatch(myElesP4,tempfjet,0.8) or isMatch(myPhosP4,tempfjet,0.8):continue
 				fjetpassindex.append(ifjet)
+				fjet.append(tempfjet)
+#--------------------------------------------------
+        #thinAK4Jets
+                        thinjetpassindex=[]
+                        for ithinjet in range(nTHINJets):
+                                tempthinjet = ROOT.TLorentzVector()
+                                tempthinjet.SetPxPyPzE(THINJetsPx[ithinjet],THINJetsPy[ithinjet],THINJetsPz[ithinjet],THINJetsEnergy[ithinjet])
+        #if (bool(passThinJetLooseID[ithinjet])==False):continue
+                                if (tempthinjet.Pt() < 30.0) or (abs(tempthinjet.Eta())>4.5):continue
+                                if isMatch(myMuosP4,tempthinjet,0.4) or isMatch(myElesP4,tempthinjet,0.4) or isMatch(myPhosP4,tempthinjet,0.4) or isMatch(fjet,tempthinjet,0.8):continue
+                                thinjetpassindex.append(ithinjet)
+
+    #---------------------------------------------------- 
 
     #----------------------------------------------------
 			jetP4Corr=[]
@@ -428,15 +429,98 @@ def Analyze():
 		txtfile.write(bkgfilename[i]+" "+str(h_bkgMbb[i].Integral()))
 		txtfile.write(" After ")
 		txtfile.write(str(h_bkgregMbb[i].Integral())+"\n")
+		#print 'Before scale \n'
+		#print  h_bkgMbb.Integral(), ' ', h_bkgregMbb.Integral() 
+		#scalefact=(41000*xsBkg)/eventsbkg
+		#print 'xsec= ', xsBkg, ' Nevt= ', eventsbkg, ' scalefact = ', scalefact
+		#h_bkgMbb.Scale(scalefact)
+		#h_bkgMbbx[i].Scale(scalefact)
+		#h_bkgMbb = h_bkgMbb*(L*xsBkg/eventsbkg)
+		#h_bkgMbbx[i]=h_bkgMbbx[i]*(L*xsBkg/eventsbkg)
+
+		#h_bkgregMbb = h_bkgregMbb*(L*xsBkg/eventsbkg)
+		#h_bkgregMbbx[i] = h_bkgregMbbx[i]*(L*xsBkg/eventsbkg)	
+
+		#Count_bkgMbb+=h_bkgMbb.Integral()
+		#Count_bkgregMbb+=h_bkgregMbb.Integral()
+		#h_bkgMbb.Reset()
+		#h_bkgregMbb.Reset()
 	for i in range(len(bkgfilename)):
 		outfile.cd()
 		h_bkgMbb[i].Write()	
+		print 'Event with mass window= ', h_bkgMbb[i].Integral(), '\n'
         	h_bkgMbbx[i].Write()
+		print 'Event without mass window= ', h_bkgMbbx[i].Integral(), '\n'
 		h_bkgregMbb[i].Write()
         	h_bkgregMbbx[i].Write()
 	outfile.Close()
         txtfile.close()
+	'''	
+	txtfile.write("\n  PunZi Significance \n")
+# Calculate and plot Punzi significance
+	punzi_Mbb, punzi_regMbb = array( 'd' ), array( 'd' )
+	for i in range (len(sigmass)):
+		norm_h_Mbb =0.
+		norm_h_Mbb = h_Mbb[i].Integral();
+		#punzi_Mbb[i]=norm_h_Mbb/NEntries	
+		effi_Mbb=norm_h_Mbb/Entry[i]
+		punzi_Mbb.append(effi_Mbb/(1+TMath.Sqrt(Count_bkgMbb)))
+		txtfile.write(str(effi_Mbb)+" Total Count Before "+str(Count_bkgMbb)+"\n")
+		#print "effi " 
+		#print(' i %i %f %f ' % (i,sigmass[i],punzi_Mbb[i]))
+		norm_h_regMbb =0.
+		norm_h_regMbb = h_regMbb[i].Integral()
+		effi_regMbb = norm_h_regMbb/Entry[i]
+		punzi_regMbb.append(effi_regMbb/(1+TMath.Sqrt(Count_bkgregMbb)))
+		txtfile.write(str(effi_regMbb)+" Total Count after "+str(Count_bkgregMbb)+"\n")
+		h_Mbb[i].Write()
+                h_regMbb[i].Write()
+		#print "effi after ", punzi_regMbb[i]
 
+	c1 = TCanvas( 'c1', 'Significance', 200, 10, 700, 500 )
+	leg = ROOT.TLegend(.73,.32,.97,.53)
+	leg.SetBorderSize(0)
+	leg.SetFillColor(0)
+	leg.SetFillStyle(0)
+	leg.SetTextFont(42)
+	leg.SetTextSize(0.035)
+	n=len(sigmass)
+	gr1 = TGraph( n, sigmass, punzi_Mbb )
+	gr1.SetLineColor( 2 )
+	gr1.SetLineWidth( 4 )
+	gr1.SetMarkerColor( 4 )
+	gr1.SetMarkerStyle( 21 )
+	gr1.SetTitle("Before regression")
+	gr1.SetName("graph1")
+	#gr1.SetDrawOption("AP");
+	#gr1.SetTitle( 'Punzi Significance' )
+	#gr1.GetXaxis().SetTitle( 'Signal Mass Point' )
+	#gr1.GetYaxis().SetTitle( 'Punzi' )
+	gr1.Write()
+
+	gr2 = TGraph( n, sigmass, punzi_regMbb )
+	gr2.SetLineColor( 3 )
+	gr2.SetLineWidth( 4 )
+	gr2.SetMarkerColor( 3 )
+	gr2.SetMarkerStyle( 24 )
+	gr2.SetTitle("After regression")
+	gr2.SetName("graph2")
+	#gr2.SetDrawOption("AP")
+	#gr1.Draw("ACP")
+	#gr2.Draw("ACP")
+	gr2.Write()
+
+	mg = TMultiGraph('mg', 'mg')
+	mg.Add(gr1, "LP")
+	mg.Add( gr2,"LP")
+	mg.SetTitle("  ; Signal Mass Point; Punzi Significance");
+	mg.Draw("ACP")
+	c1.BuildLegend()
+	c1.SaveAs("sig.pdf")
+	
+	outfile.Close()
+	txtfile.close()
+	'''
 def DeltaPhi(ph1, ph2):
     dphi=Phi_mpi_pi(ph1-ph2)
     return dphi
