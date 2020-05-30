@@ -217,7 +217,7 @@ def Analyze():
 	signal_entry.Write()
 # BackGround Samples and selections
 	bkgfilename = list()
-	with open ("bkgfile3.txt", "r") as mybkgfile:
+	with open ("bkgfile2.txt", "r") as mybkgfile:
 		for line in mybkgfile:
 			bkgfilename.append(line.strip())
 
@@ -319,6 +319,7 @@ def Analyze():
 			#--------------------------------------------------
    	# Met Cut
 			if(pfMet<200.):continue
+			#if(tauid>0.0):continue
 
    		#--------------------------------------------------
 		#Lepton Collection
@@ -414,15 +415,15 @@ def Analyze():
 				addJet=(j1p4+j2p4)
 				higgs_pt=addJet.Pt()
 				#print "pt higgs", addJet.Pt(), 'Mass =', addJet.M()
-				if(addJet.M() > 100 and addJet.M()<150):
-					h_bkgMbb[i].Fill(addJet.M())
+				#if(addJet.M() > 100 and addJet.M()<150):
+					#h_bkgMbb[i].Fill(addJet.M())
 				h_bkgMbbx[i].Fill(addJet.M())
 				j1p4Corr=jetP4Corr[0]
 				j2p4Corr=jetP4Corr[1]
 				addJetCorr=(j1p4Corr+j2p4Corr)
 				Corrhiggs_pt=addJetCorr.Pt()
-				if(addJetCorr.M() > 100 and addJetCorr.M()<150):
-					h_bkgregMbb[i].Fill(addJetCorr.M())
+				#if(addJetCorr.M() > 100 and addJetCorr.M()<150):
+					#h_bkgregMbb[i].Fill(addJetCorr.M())
 				h_bkgregMbbx[i].Fill(addJetCorr.M())
 
 		#xsBkg = crsec.getXsec(bkgfilename[i])
@@ -447,11 +448,9 @@ def Analyze():
 		#h_bkgregMbb.Reset()
 	for i in range(len(bkgfilename)):
 		outfile.cd()
-		h_bkgMbb[i].Write()	
-		print 'Event with mass window= ', h_bkgMbb[i].Integral(), '\n'
+		#h_bkgMbb[i].Write()	
         	h_bkgMbbx[i].Write()
-		print 'Event without mass window= ', h_bkgMbbx[i].Integral(), '\n'
-		h_bkgregMbb[i].Write()
+		#h_bkgregMbb[i].Write()
         	h_bkgregMbbx[i].Write()
 	outfile.Close()
         txtfile.close()
